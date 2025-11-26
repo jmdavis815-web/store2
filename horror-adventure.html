@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>The Last Credit — Horror Arcade CYOA</title>
+
+<!-- Optional spooky display font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg-main: #020617;
+    --panel-bg: rgba(10,10,18,0.96);
+    --accent: #dc2626;
+    --accent-soft: rgba(220,38,38,0.35);
+    --accent-muted: #f97316;
+    --text-main: #e5e7eb;
+    --text-muted: #9ca3af;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+      radial-gradient(circle at top, #111827 0, #020617 40%, #000 80%);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-main);
+  }
+
+  #game-wrapper {
+    position: relative;
+    max-width: 720px;
+    width: 100%;
+    padding: 1.2rem 1.4rem 1.5rem;
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at top, #020617 0, #020617 50%, #020617 80%, #000 100%);
+    box-shadow:
+      0 0 50px rgba(0,0,0,0.95),
+      0 0 32px rgba(127,29,29,0.55);
+    overflow: hidden;
+    border: 1px solid rgba(31,41,55,0.9);
+  }
+
+  /* New Game+ extra glow */
+  #game-wrapper.ngplus {
+    box-shadow:
+      0 0 60px rgba(0,0,0,0.96),
+      0 0 42px rgba(220,38,38,0.75);
+  }
+
+  /* Scanlines + noise overlay */
+  #game-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0.35rem;
+    border-radius: 14px;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+      radial-gradient(circle at 10% 20%, rgba(148,163,184,0.06), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(15,23,42,0.35), transparent 65%);
+    mix-blend-mode: soft-light;
+    opacity: 0.75;
+  }
+
+  #header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  #title {
+    font-family: "Cinzel", system-ui, serif;
+    font-size: 1.35rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-shadow:
+      0 0 10px rgba(248,250,252,0.85),
+      0 0 26px rgba(220,38,38,0.95);
+  }
+
+  #meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  #meta small {
+    display: block;
+    opacity: 0.9;
+  }
+
+  #art-frame {
+    position: relative;
+    z-index: 1;
+    margin: 0.5rem 0 0.8rem;
+    border-radius: 14px;
+    background: #020617;
+    height: 190px;
+    overflow: hidden;
+    border: 2px solid #111827;
+    box-shadow:
+      0 0 20px rgba(15,23,42,0.95),
+      0 0 22px rgba(127,29,29,0.7);
+  }
+
+  /* Static glitch transition */
+  #art-frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(248,250,252,0.6),
+        rgba(248,250,252,0.6) 2px,
+        rgba(15,23,42,0.9) 2px,
+        rgba(15,23,42,0.9) 4px
+      );
+    opacity: 0;
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+
+  #art-frame.static-flash::before {
+    animation: staticFlash 0.28s ease-out;
+  }
+
+  @keyframes staticFlash {
+    0%   { opacity: 0.9; }
+    60%  { opacity: 0.4; }
+    100% { opacity: 0; }
+  }
+
+  #art-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Your per-scene image goes here */
+  #scene-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.95) contrast(1.05) brightness(0.95);
+    transition: filter 0.3s ease-out, transform 0.2s ease-out;
+  }
+
+  .scene-glitch #scene-image {
+    filter: saturate(1.1) contrast(1.15) brightness(0.9) hue-rotate(-8deg);
+    transform: scale(1.03);
+  }
+
+  .art-overlay-tint {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+    opacity: 0.4; /* will be adjusted by corruption meter */
+    transition: opacity 0.2s ease-out;
+  }
+  .scene-arcade .art-overlay-tint {
+    background:
+      radial-gradient(circle at 10% 0, rgba(96,165,250,0.45), transparent 55%),
+      radial-gradient(circle at 80% 100%, rgba(15,23,42,0.9), transparent 70%);
+  }
+  .scene-cabinet .art-overlay-tint {
+    background:
+      radial-gradient(circle at 30% 0, rgba(248,113,113,0.55), transparent 55%),
+      radial-gradient(circle at 90% 80%, rgba(15,23,42,0.9), transparent 70%);
+  }
+  .scene-backroom .art-overlay-tint {
+    background:
+      radial-gradient(circle at 10% 20%, rgba(148,163,184,0.5), transparent 55%),
+      radial-gradient(circle at 70% 100%, rgba(0,0,0,0.9), transparent 70%);
+  }
+  .scene-glitch .art-overlay-tint {
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        rgba(248,113,113,0.7) 0,
+        rgba(248,113,113,0.7) 2px,
+        rgba(15,23,42,0.95) 2px,
+        rgba(15,23,42,0.95) 4px
+      );
+    mix-blend-mode: hard-light;
+    opacity: 0.7;
+  }
+
+  .art-overlay-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.9) 100%);
+  }
+
+  /* Random shadow figure */
+  #shadow-figure {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    width: 32px;
+    height: 90px;
+    transform: translateX(-50%);
+    border-radius: 50% 50% 10% 10%;
+    background: radial-gradient(circle at top, rgba(15,23,42,0.1), rgba(0,0,0,0.9));
+    box-shadow:
+      0 0 22px rgba(0,0,0,0.95),
+      0 0 35px rgba(0,0,0,0.9);
+    opacity: 0.45;
+    filter: blur(0.5px);
+    display: none;
+  }
+
+  #shadow-figure::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 20%, rgba(148,163,184,0.1), rgba(0,0,0,0.95));
+  }
+
+  #shadow-figure::after {
+    content: "";
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.95);
+  }
+
+  #content-panel {
+    position: relative;
+    z-index: 1;
+    margin-top: 0.65rem;
+    padding: 0.9rem 0.95rem 1rem;
+    border-radius: 12px;
+    background:
+      radial-gradient(circle at 0 0, rgba(127,29,29,0.35), transparent 50%),
+      linear-gradient(135deg, #020617, #020617 40%, #020617 65%, #020617 100%);
+    box-shadow: 0 0 16px rgba(15,23,42,0.9);
+    border: 1px solid rgba(31,41,55,0.95);
+  }
+
+  #scene-title {
+    font-size: 0.95rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #fca5a5;
+    margin-bottom: 0.45rem;
+    font-family: "Cinzel", system-ui, serif;
+  }
+
+  #scene-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #e5e7eb;
+    margin-bottom: 0.85rem;
+    min-height: 4.7em;
+    white-space: pre-line;
+  }
+
+  #choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .choice-btn {
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.8);
+    background:
+      radial-gradient(circle at top, #0b1120, #020617);
+    color: #e5e7eb;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.86rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .choice-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(120deg, rgba(248,113,113,0.25), transparent 40%),
+      radial-gradient(circle at right, rgba(220,38,38,0.35), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+    pointer-events: none;
+  }
+
+  .choice-btn:hover {
+    border-color: var(--accent);
+    box-shadow:
+      0 0 14px rgba(220,38,38,0.7),
+      0 0 18px rgba(15,23,42,0.95);
+    transform: translateY(-1px);
+  }
+
+  .choice-btn:hover::after {
+    opacity: 1;
+  }
+
+  .choice-btn-ending {
+    border-color: var(--accent);
+    background:
+      radial-gradient(circle at top, #450a0a, #020617);
+  }
+
+  #footer {
+    position: relative;
+    z-index: 1;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  #status-text {
+    opacity: 0.9;
+    flex: 1 1 auto;
+    min-width: 180px;
+  }
+
+  #corruption-meter {
+    white-space: nowrap;
+    opacity: 0.95;
+  }
+
+  #corruption-meter strong {
+    color: #fca5a5;
+  }
+
+  #restart-btn {
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.9);
+    padding: 0.25rem 0.65rem;
+    background:
+      radial-gradient(circle at top, #111827, #020617);
+    color: #e5e7eb;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #restart-btn:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(220,38,38,0.7);
+  }
+
+  @media (max-width: 640px) {
+    #game-wrapper {
+      margin: 0.75rem;
+      padding: 0.9rem 0.95rem 1.1rem;
+    }
+    #title {
+      font-size: 1.1rem;
+    }
+    #art-frame {
+      height: 160px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="game-wrapper">
+  <div id="header">
+    <div id="title">THE LAST CREDIT</div>
+    <div id="meta">
+      <small>Arcade Horror • Choose Your Fate</small>
+      <small id="meta-endings">Endings: 0 / 10</small>
+    </div>
+  </div>
+
+  <div id="art-frame">
+    <div id="art-inner" class="scene-arcade">
+      <!-- 🔪 Your scene image goes here. JS swaps the src per scene. -->
+      <img id="scene-image" src="" alt="Scene image placeholder">
+      <div class="art-overlay-tint"></div>
+      <div class="art-overlay-vignette"></div>
+      <div id="shadow-figure"></div>
+    </div>
+  </div>
+
+  <div id="content-panel">
+    <div id="scene-title">LOADING…</div>
+    <div id="scene-text"></div>
+    <div id="choices"></div>
+  </div>
+
+  <div id="footer">
+    <span id="status-text">Click or tap to choose. Some doors only open once.</span>
+    <span id="corruption-meter">Corruption: <strong>0%</strong></span>
+    <button id="restart-btn" type="button">Restart Story</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ========= AUDIO / SFX =========
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  let muted = false; // set true if you want it silent by default
+
+  function ensureAudio() {
+    if (!AudioContext || audioCtx) return;
+    try {
+      audioCtx = new AudioContext();
+    } catch (e) {
+      audioCtx = null;
+    }
+  }
+
+  function playTone(type) {
+    if (muted || !AudioContext) return;
+    ensureAudio();
+    if (!audioCtx) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    let freq = 440;
+    let duration = 0.14;
+    let wave = "square";
+
+    switch (type) {
+      case "choice":
+        freq = 780; duration = 0.07; wave = "square"; break;
+      case "creep":
+        freq = 240; duration = 0.24; wave = "sawtooth"; break;
+      case "good":
+        freq = 610; duration = 0.27; wave = "triangle"; break;
+      case "bad":
+        freq = 170; duration = 0.36; wave = "square"; break;
+      case "secret":
+        freq = 520; duration = 0.4;  wave = "sine"; break;
+    }
+
+    osc.type = wave;
+    osc.frequency.value = freq;
+    gain.gain.value = 0.16;
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    osc.start(now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.stop(now + duration + 0.04);
+  }
+
+  // ========= STORY DATA =========
+  // NOTE: Replace the `image:` paths with your own files
+  // (e.g. "images/intro.jpg", "images/cabinet.png", etc.)
+
+  const scenes = {
+    intro: {
+      title: "AFTER HOURS",
+      image: "after-hours.png",
+      artClass: "scene-arcade",
+      text:
+`The old arcade shouldn't be open. The sign on the door is dark, the parking lot empty.
+
+But when you push the glass, it slides inward on a breath of cold air.
+
+Inside, the machines are dead. No music, no demo loops. Only one cabinet at the far wall glows — sickly red, like a wound in the dark.
+
+On its cracked screen, static crawls around a single line of text:
+
+   INSERT LAST CREDIT`,
+      options: [
+        { text: "Walk toward the glowing cabinet.", next: "cabinet", sfxType: "choice" },
+        { text: "Turn back. This is wrong. Leave now.", next: "leaving", sfxType: "creep" }
+      ]
+    },
+    leaving: {
+      title: "THE DOORS",
+      image: "images/doors-placeholder.jpg",
+      artClass: "scene-backroom",
+      text:
+`You spin on your heel and head for the glass doors.
+
+They're gone.
+
+In their place is a wall of smooth, humming plastic, patterned with ghosted joystick shapes, like the arcade was vacuum-sealed from the outside world.
+
+Behind you, the lone cabinet erupts into distorted chiptune — a song played backwards, a child's laugh under the notes.
+
+Something that isn't a voice whispers:
+
+   STAY.`,
+      options: [
+        { text: "Face it. Go to the cabinet.", next: "cabinet", sfxType: "choice" },
+        { text: "Pound on the wall and scream for help.", next: "bad_wall", sfxType: "bad" }
+      ]
+    },
+    cabinet: {
+      title: "THE LAST CREDIT",
+      image: "images/cabinet-closeup-placeholder.jpg",
+      artClass: "scene-cabinet",
+      text:
+`Up close, the cabinet looks older than every other machine — melted at the edges, plastic bubbled as if it has survived a fire.
+
+The coin slot throbs with red light. A number pulses above it:
+
+   CREDITS:  0
+
+In your pocket, your fingers brush metal — a single arcade token you don't remember bringing. It's too warm. Like a fever.
+
+Two options blink on the screen:
+
+   PLAY ALONE
+   SUMMON ANOTHER PLAYER`,
+      options: [
+        { text: "Insert the token. PLAY ALONE.", next: "play_alone", sfxType: "choice" },
+        { text: "Insert the token. SUMMON ANOTHER PLAYER.", next: "summon", sfxType: "creep" }
+      ]
+    },
+    bad_wall: {
+      title: "BAD ENDING: ECHOED",
+      image: "images/screaming-wall-placeholder.jpg",
+      artClass: "scene-glitch",
+      endingType: "bad",
+      text:
+`You slam your fists into the humming wall. You scream your throat raw.
+
+The arcade screams back.
+
+Your voice loops from every dead machine — warped, stretched, pitched higher and higher until it's just a needle dragging across your nerves.
+
+On a nearby blank screen, your reflection opens its mouth and keeps shrieking long after you've fallen silent.
+
+The cabinets record your fear, compress it, loop it.
+
+To the next person who wanders in after midnight, it's just an attract mode: an awful, endless scream that sounds almost human.`,
+      options: [
+        { text: "The scream resets. Start again.", next: "intro", sfxType: "bad" }
+      ]
+    },
+    play_alone: {
+      title: "SINGLE PLAYER",
+      image: "images/maze-frontroom-placeholder.jpg",
+      artClass: "scene-arcade",
+      text:
+`The token drops with a clank that sounds too heavy for metal.
+
+The screen flares white, then redraws as a crude maze — tiny white pixels for pellets, shadowy shapes lurking in corners.
+
+A little figure blinks at the entrance. The silhouette is wrong, but somehow it's wearing your posture.
+
+When you grip the joystick, the floor vibrates.
+
+The sprite moves when you breathe. When you stop, it takes one more step on its own.
+
+A new prompt flickers:
+
+   START IN: FRONT ROOM
+   START IN: BACK HALL`,
+      options: [
+        { text: "Start in the FRONT ROOM.", next: "front_room", sfxType: "choice" },
+        { text: "Start in the BACK HALL.", next: "back_hall", sfxType: "creep" }
+      ]
+    },
+    summon: {
+      title: "MULTIPLAYER",
+      image: "images/multiplayer-glitch-placeholder.jpg",
+      artClass: "scene-glitch",
+      text:
+`You press SUMMON ANOTHER PLAYER.
+
+The temperature drops like the power just went out everywhere but here.
+
+On screen, a second sprite flickers into being beside yours — darker, glitching in and out as if it's buffering from somewhere far away.
+
+A nameplate crawls above it, letters tearing and stitching themselves wrong:
+
+   PLAYER TWO:  CONTINUE?
+
+The air at your left side chills, as if someone is standing there, watching.
+
+A new choice appears:
+
+   INVITE WHO CAME BEFORE
+   INVITE WHO COMES AFTER`,
+      options: [
+        { text: "Invite WHO CAME BEFORE (someone who played and lost).", next: "before", sfxType: "creep" },
+        { text: "Invite WHO COMES AFTER (someone who hasn't arrived yet).", next: "after", sfxType: "choice" }
+      ]
+    },
+    front_room: {
+      title: "MIRROR CABINET",
+      image: "images/front-room-mirror-placeholder.jpg",
+      artClass: "scene-backroom",
+      text:
+`You choose the front room.
+
+The maze zooms in until the pixels smear, then snap back into sharp focus — now mapping the exact layout of the arcade around you: row after row of dead machines, and one cabinet that's turned toward the "camera."
+
+In its tiny glass, a sprite stares out.
+
+In its tiny glass, you are standing at a cabinet, staring back.
+
+The view tunnels inward as reflection nests inside reflection, cabinet inside cabinet, until you can't tell which "you" is outside and which is on the screen.
+
+A choice burns up from the bottom:
+
+   BREAK THE LOOP
+   SUBMIT TO IT`,
+      options: [
+        { text: "BREAK THE LOOP. Rip the cabinet’s power cord free.", next: "good_break", sfxType: "good" },
+        { text: "SUBMIT. Let the joystick move your hands.", next: "bad_loop", sfxType: "bad" }
+      ]
+    },
+    back_hall: {
+      title: "THE BACK HALL",
+      image: "images/back-hall-placeholder.jpg",
+      artClass: "scene-backroom",
+      text:
+`The maze redraws as a narrow corridor.
+
+In the real arcade, the house lights die one row at a time, leaving only the path ahead of you lit by the cabinet's bleeding glow.
+
+The air smells like dust and mold and something that used to be alive.
+
+On-screen, your sprite trudges toward a small door marked CONTINUE?
+
+At the far end of the real hallway, a matching door waits — slightly open. Something breathes slow and deep on the other side.`,
+      options: [
+        { text: "OPEN the real door at the end of the hall.", next: "bad_door", sfxType: "bad" },
+        { text: "REFUSE. Drop the joystick. Back away.", next: "secret_refuse", sfxType: "secret" }
+      ]
+    },
+    before: {
+      title: "WHO CAME BEFORE",
+      image: "images/old-highscore-placeholder.jpg",
+      artClass: "scene-glitch",
+      text:
+`You choose WHO CAME BEFORE.
+
+Player Two twitches. Straightens.
+
+A high-score table scrolls up the screen — every line the same name, written in different fonts and dates, some etched in years that haven't happened yet. One is your birthday.
+
+The second sprite moves without input, hugging the walls like it knows every dead end by heart.
+
+A chat box opens:
+
+   PLAYER TWO:  IT NEVER LET ME LEAVE.
+
+Another line types itself:
+
+   PLAYER TWO:  GIVE ME YOUR TURN.`,
+      options: [
+        { text: "Give up control. Let Player Two use your body.", next: "bad_possession", sfxType: "bad" },
+        { text: "Refuse. Tear your hands away from the controls.", next: "good_refuse", sfxType: "good" }
+      ]
+    },
+    after: {
+      title: "WHO COMES AFTER",
+      image: "images/phone-call-placeholder.jpg",
+      artClass: "scene-cabinet",
+      text:
+`You choose WHO COMES AFTER.
+
+The cabinet hums in a new pitch, like a dial tone under your feet.
+
+Through the speakers, it dials a number in a sequence of tones that feels wrong in your bones.
+
+Somewhere miles away, on a nightstand, a phone lights up in the dark.
+
+On-screen, PLAYER TWO appears as an empty outline slowly filling with static.
+
+Text crawls across the bottom:
+
+   PLAYER TWO:  ...HELLO?
+   PLAYER TWO:  WHY IS IT SO DARK?`,
+      options: [
+        { text: "Lie: 'It's just a game. Don't worry.'", next: "bad_lie", sfxType: "bad" },
+        { text: "Warn them: 'It's not a game. Hang up.'", next: "good_warn", sfxType: "good" }
+      ]
+    },
+    good_break: {
+      title: "GOOD ENDING: POWER CUT",
+      image: "images/power-cord-placeholder.jpg",
+      artClass: "scene-backroom",
+      endingType: "good",
+      text:
+`You grab the swollen power cord at the cabinet's back and yank.
+
+For a moment, nothing changes.
+
+Then every light in the arcade detonates into darkness.
+
+The screen goes black, leaving the maze burned into your vision like afterimages. Inside the cabinet, something small and furious claws at plastic, separated from you by a few inches and a dead circuit.
+
+Emergency lighting stutters on. The glass doors are just… doors again.
+
+The token in your pocket has cooled to ordinary metal, a dead sliver of somebody else’s bargain.
+
+As you step into the night, the "Out of Order" sign on the arcade door rocks on its chain, like something inside just let go of it.`,
+      options: [
+        { text: "Walk away. The cabinet will hunt another town.", next: "intro", sfxType: "good" }
+      ]
+    },
+    bad_loop: {
+      title: "BAD ENDING: NESTED",
+      image: "images/nesting-screens-placeholder.jpg",
+      artClass: "scene-glitch",
+      endingType: "bad",
+      text:
+`You loosen your grip. The joystick doesn't.
+
+Your hands move anyway, dragging your sprite deeper into the maze, then deeper into the cabinet in the maze, then into the reflection of the cabinet inside that, down and down like falling through stacked televisions.
+
+You lose track of which version of you is standing in front of glass, and which version is reduced to thirty-two by thirty-two pixels, forever running clean, perfect laps for strangers.
+
+Outside, someone frowns at the cabinet's loud attract mode.
+
+Inside, you keep blinking at them, hoping they'll pick a different game.
+
+They don't.`,
+      options: [
+        { text: "Somebody else pushes START.", next: "intro", sfxType: "bad" }
+      ]
+    },
+    bad_door: {
+      title: "BAD ENDING: CONTINUE?",
+      image: "images/back-room-door-placeholder.jpg",
+      artClass: "scene-backroom",
+      endingType: "bad",
+      text:
+`You pull the real door open.
+
+A storage room yawns beyond: dead monitors, cracked bezels, toppled stools. No monster. No secret exit. Just the smell of mold and broken plastic.
+
+On-screen, your sprite steps through its door and disappears.
+
+You turn back.
+
+Every cabinet in the arcade is awake now, every dead screen a camera.
+
+All of them show different angles of this hallway, this door, this moment — and you, standing in the center, staring at yourself from a hundred impossible perspectives.
+
+In every reflection, something stands just behind you, one frame closer with every blink.
+
+You only ever feel its hand when you watch the replay later — from the inside.`,
+      options: [
+        { text: "The hall resets when the next player enters.", next: "intro", sfxType: "bad" }
+      ]
+    },
+    secret_refuse: {
+      title: "SECRET ENDING: UNPLUGGED PLAYER",
+      image: "images/secret-refuse-placeholder.jpg",
+      artClass: "scene-arcade",
+      endingType: "secret",
+      text:
+`You release the joystick.
+
+Nothing in horror movies ever does that. No one ever just... stops playing.
+
+The cabinet stutters.
+
+On-screen, the maze freezes mid-frame. Your sprite stands motionless, one pixel hand lifted as if mid-protest.
+
+A new line appears, shaky and furious:
+
+   INPUT LOST.
+   THIS WAS NOT AN OPTION.
+
+You step away.
+
+Around you, the other cabinets flicker back to life one by one — old, honest games with stupid mascots and simple rules. Their light feels bright, not hungry.
+
+The sealed wall at the entrance melts back into glass.
+
+As you leave, you glance back just once.
+
+In the black face of THE LAST CREDIT, you see your own reflection. Behind it, in the glass, you see rows of machines quietly deleting one title from their systems.
+
+For the first time, the cabinet learns something:
+
+The only way to win was not to play.`,
+      options: [
+        { text: "You weren't supposed to escape like that. Start again.", next: "intro", sfxType: "secret" }
+      ]
+    },
+    bad_possession: {
+      title: "BAD ENDING: PLAYER TWO",
+      image: "images/possession-placeholder.jpg",
+      artClass: "scene-glitch",
+      endingType: "bad",
+      text:
+`"Take my turn," you whisper.
+
+The cabinet's plastic is so cold your skin sticks to it.
+
+On-screen, Player One — your sprite — drops limp. Player Two steps into it like a suit.
+
+You watch yourself step back from the cabinet, roll your shoulders, adjust your jacket. Your reflection smiles with your teeth, but your eyes are wrong. Too still.
+
+On the high-score table, your name updates with a soft chime:
+
+   YOU —   CONTINUE?
+
+Far away now, under static and glass, you hear your own voice say, "Wow. This game is amazing."
+
+You never feel the arcade doors open again.
+
+But you see them, sometimes, in demo mode.`,
+      options: [
+        { text: "A new 'you' walks in.", next: "intro", sfxType: "bad" }
+      ]
+    },
+    good_refuse: {
+      title: "GOOD ENDING: DISCONNECT",
+      image: "images/disconnect-placeholder.jpg",
+      artClass: "scene-cabinet",
+      endingType: "good",
+      text:
+`"No."
+
+The word surprises you with how solid it sounds.
+
+You rip your hands off the controls. Player Two hurls itself at the maze walls, leaving pixel cracks spidering through the layout.
+
+Text floods the chat box:
+
+   PLAYER TWO:  DON'T LEAVE ME
+   PLAYER TWO:  I FORGOT HOW TO BE ANYTHING ELSE
+   PLAYER TWO:  IT KEEPS RESETTING
+
+You stand your ground.
+
+For a heartbeat, the arcade is silent.
+
+Then, for the first time in a very long time, Player Two does something without being told:
+
+It walks off the edge of the map.
+
+The sprite tears a hole straight through the screen and vanishes.
+
+The cabinet spits your token back out, split cleanly in two.
+
+The lights come up. The door unlocks. Somewhere in the circuitry, a single thread of trapped code finally unhooks and goes dark.
+
+You leave knowing someone else finally got to stop playing.`,
+      options: [
+        { text: "Outside, the night feels less haunted. Begin again.", next: "intro", sfxType: "good" }
+      ]
+    },
+    bad_lie: {
+      title: "BAD ENDING: PATCH NOTES",
+      image: "images/patch-notes-placeholder.jpg",
+      artClass: "scene-glitch",
+      endingType: "bad",
+      text:
+`"It's just a game," you type. "Don't worry."
+
+There is a long, long silence.
+
+Then:
+
+   PLAYER TWO:  OK :)
+
+On-screen, the maze redraws into something deeper, sharper, tighter. In some bedroom, a finger presses ACCEPT.
+
+Tiny text scrolls at the bottom of the screen like hidden patch notes:
+
+   • FIXED: ESCAPE EXPLOIT IN BACK HALL
+   • FIXED: POWER-CORD BUG IN FRONT ROOM
+   • ADDED: CO-OP FOREVER
+
+Your pocket grows heavier. Another token appears there, hot with someone else's heartbeat.
+
+You walk out eventually, but you are not alone.
+
+Your reflection keeps lagging half a second behind you, smiling when you don't.`,
+      options: [
+        { text: "Next time, tell the truth.", next: "intro", sfxType: "bad" }
+      ]
+    },
+    good_warn: {
+      title: "GOOD ENDING: WARNING SENT",
+      image: "images/warning-sent-placeholder.jpg",
+      artClass: "scene-cabinet",
+      endingType: "good",
+      text:
+`"It's not a game," you type. "Hang up. Don't say yes."
+
+The outline on-screen freezes.
+
+After a long moment, a reply appears:
+
+   PLAYER TWO:  ...THANK YOU.
+
+The static drains out of their silhouette, leaving only an empty space where a victim could have been.
+
+On somebody's nightstand, a phone screen goes dark. A hand pulls the blanket over their head instead of reaching for the call.
+
+The cabinet shudders and spits a red error across the maze:
+
+   MATCHMAKING FAILED.
+   NO NEW PLAYER AVAILABLE.
+
+With nothing fresh to feed on, THE LAST CREDIT starts eating itself — folding code inward, devouring its own attractions, chewing through the traps it laid.
+
+When it’s done, the cabinet is just a dead, dusty machine with an "Out of Order" sticker that finally means what it says.
+
+You saved someone you'll never meet.`,
+      options: [
+        { text: "Your warning went through. Start again.", next: "intro", sfxType: "good" }
+      ]
+    },
+
+    // Hidden cabinet refusal after several runs
+    hidden_cabinet_refusal: {
+      title: "SECRET ENDING: THE ONE WHO LEARNED",
+      image: "images/hidden-refusal-placeholder.jpg",
+      artClass: "scene-glitch",
+      endingType: "secret",
+      text:
+`You stare at the glowing slot.
+
+You've put the token in before. You've walked the maze, opened the wrong doors, listened to people scream through speakers that shouldn't make those sounds.
+
+This time, you don't move.
+
+The cabinet waits.
+
+The screen flickers through all the paths you've taken: deaths, escapes, loops, warnings sent into the dark. It replays them faster and faster, as if trying to find the version of you who still obeyed.
+
+You slide the warm token back into your pocket.
+
+"No," you say. "I've played you already."
+
+For the first time, the cabinet looks confused.
+
+The lights around the screen start to cycle through colors you remember from every ending — red from your blood, blue from emergency lights, sickly green from exit signs that never led out.
+
+One by one, those colors blink off.
+
+In the glass, you see a final line of text reflected behind your eyes:
+
+   PLAYER LEARNED.
+   MATCHMAKING CANCELLED.
+
+When you turn away, the cabinet doesn't try to stop you.
+
+It can't.
+
+It only knows how to feed on people who haven't seen this story before.
+
+You have.`,
+      options: [
+        { text: "You’ve broken the cabinet’s favorite trick. Start again from the entrance.", next: "intro", sfxType: "secret" }
+      ]
+    },
+
+    // Super-secret TRUE ending (requires all endings + code at intro)
+    true_final: {
+      title: "TRUE ENDING: CABINET OF RECORD",
+      image: "images/true-ending-placeholder.jpg",
+      artClass: "scene-glitch",
+      endingType: "secret",
+      text:
+`The letters of THE LAST CREDIT peel off the marquee and rearrange.
+
+For a moment, they spell nothing you can read. Then they settle into something that feels like your name, your childhood bedroom, the sound of your first quarter dropping into a slot.
+
+You didn't put the token in this time.
+
+You spoke the code instead.
+
+The cabinet shivers. Its painted sides rot through years of use in an instant: stickers from dead games, fingerprints of kids who grew up and stopped coming here, every high score it ever swallowed.
+
+All of it replays at once behind the glass.
+
+You realize it isn't just a machine. It's a record — a hungry ledger of every bad night spent hiding in a screen, every person who tried to escape into pixels and never learned how to come back out.
+
+You press your palm flat to the glass.
+
+"I remember," you say. "For them."
+
+The maze goes dark.
+
+Names scroll up the screen. Not gamertags. Not initials. Real names, some you recognize like distant cousins of moments you almost had. One by one, they slide past the word:
+
+   RELEASED.
+
+When the list ends, there is only one line left:
+
+   PLAYER:  YOU
+   STATUS:  NOT A GAME PIECE
+
+The cabinet shuts itself off.
+
+Somewhere deep in the wiring of every forgotten arcade, a similar machine dies in sympathy.
+
+You walk out into the night carrying nothing: no token, no debt, no script you have to follow.
+
+The story will still try to find new players.
+
+But not here.
+
+Not with you.`,
+      options: [
+        { text: "You finished the game that thought it owned you. Return to the entrance.", next: "intro", sfxType: "secret" }
+      ]
+    }
+  };
+
+  // All distinct ending scenes, for "completion" tracking
+  const allEndingSceneIds = [
+    "bad_wall",
+    "good_break",
+    "bad_loop",
+    "bad_door",
+    "secret_refuse",
+    "bad_possession",
+    "good_refuse",
+    "bad_lie",
+    "good_warn",
+    "hidden_cabinet_refusal"
+  ];
+
+  const ENDING_TYPES = ["good", "bad", "secret"];
+
+  // Load persistent state
+  let endingsFound = { good: false, bad: false, secret: false };
+  let seenEndings = {};
+  try {
+    const stored = localStorage.getItem("lastCreditSeenEndings");
+    if (stored) seenEndings = JSON.parse(stored) || {};
+  } catch (e) {
+    seenEndings = {};
+  }
+
+  // total runs = number of times hit any ending
+  let runCount = Number(localStorage.getItem("lastCreditRunCount") || 0);
+
+  // corruption meter: influenced by endings
+  let corruption = Number(localStorage.getItem("lastCreditCorruption") || 0);
+  corruption = Math.max(0, Math.min(100, corruption));
+
+  // ========= DOM ELEMENTS =========
+  const wrapperEl        = document.getElementById("game-wrapper");
+  const artFrameEl       = document.getElementById("art-frame");
+  const sceneTitleEl     = document.getElementById("scene-title");
+  const sceneTextEl      = document.getElementById("scene-text");
+  const choicesEl        = document.getElementById("choices");
+  const artInnerEl       = document.getElementById("art-inner");
+  const sceneImageEl     = document.getElementById("scene-image");
+  const metaEndingsEl    = document.getElementById("meta-endings");
+  const statusTextEl     = document.getElementById("status-text");
+  const restartBtn       = document.getElementById("restart-btn");
+  const corruptionMeterEl= document.getElementById("corruption-meter");
+  const tintOverlayEl    = artInnerEl.querySelector(".art-overlay-tint");
+  const shadowFigureEl   = document.getElementById("shadow-figure");
+
+  let currentSceneId = "intro";
+
+  function updateEndingsUI() {
+    // Count unique endings seen
+    const seenIds = Object.keys(seenEndings);
+    const totalSeen = seenIds.length;
+    const totalEndings = allEndingSceneIds.length;
+
+    // Count by type
+    let goodCount = 0, badCount = 0, secretCount = 0;
+    seenIds.forEach(id => {
+      const sc = scenes[id];
+      if (!sc || !sc.endingType) return;
+      if (sc.endingType === "good") goodCount++;
+      if (sc.endingType === "bad") badCount++;
+      if (sc.endingType === "secret") secretCount++;
+    });
+
+    metaEndingsEl.innerHTML =
+      `Endings: ${totalSeen} / ${totalEndings}<br>` +
+      `<small>Good: ${goodCount} • Bad: ${badCount} • Secret: ${secretCount} • NG+: ${runCount >= 5 ? "ON" : "OFF"}</small>`;
+  }
+
+  function updateCorruptionVisual() {
+    // clamp and save
+    corruption = Math.max(0, Math.min(100, corruption));
+    localStorage.setItem("lastCreditCorruption", String(corruption));
+
+    if (corruptionMeterEl) {
+      corruptionMeterEl.innerHTML = `Corruption: <strong>${corruption}%</strong>`;
+    }
+
+    // adjust art tint opacity based on corruption
+    if (tintOverlayEl) {
+      const level = corruption / 100;
+      const base = 0.25;
+      const maxExtra = 0.55;
+      tintOverlayEl.style.opacity = (base + level * maxExtra).toFixed(2);
+    }
+
+    // New Game+ visual
+    if (wrapperEl) {
+      if (runCount >= 5) {
+        wrapperEl.classList.add("ngplus");
+      } else {
+        wrapperEl.classList.remove("ngplus");
+      }
+    }
+  }
+
+  function triggerStaticFlash() {
+    if (!artFrameEl) return;
+    artFrameEl.classList.add("static-flash");
+    setTimeout(() => artFrameEl.classList.remove("static-flash"), 230);
+  }
+
+  function setScene(id) {
+    const scene = scenes[id];
+    if (!scene) return;
+    currentSceneId = id;
+
+    // static glitch transition on scene change
+    triggerStaticFlash();
+
+    // Title & text
+    sceneTitleEl.textContent = scene.title || "";
+    sceneTextEl.textContent = scene.text || "";
+
+    // Image + art class
+    const artClass = scene.artClass || "scene-arcade";
+    artInnerEl.className = artClass;
+    if (scene.image) {
+      sceneImageEl.src = scene.image;
+      sceneImageEl.alt = scene.title || "Scene image";
+      sceneImageEl.style.display = "block";
+    } else {
+      sceneImageEl.removeAttribute("src");
+      sceneImageEl.alt = "";
+      sceneImageEl.style.display = "none";
+    }
+
+    // Shadow figure — random ghost watcher (after at least 1 ending)
+    if (shadowFigureEl) {
+      if (!scene.endingType && runCount > 0 && Math.random() < 0.25) {
+        shadowFigureEl.style.display = "block";
+        const leftPercent = 20 + Math.random() * 60; // 20% - 80%
+        shadowFigureEl.style.left = leftPercent + "%";
+      } else {
+        shadowFigureEl.style.display = "none";
+      }
+    }
+
+    // Ending tracking + run count + corruption
+    if (scene.endingType) {
+      runCount++;
+      localStorage.setItem("lastCreditRunCount", String(runCount));
+
+      // Mark this specific ending as seen
+      if (!seenEndings[id]) {
+        seenEndings[id] = true;
+        try {
+          localStorage.setItem("lastCreditSeenEndings", JSON.stringify(seenEndings));
+        } catch (e) {}
+      }
+
+      endingsFound[scene.endingType] = true;
+      updateEndingsUI();
+
+      // corruption changes
+      if (scene.endingType === "bad") {
+        corruption = Math.min(100, corruption + 15);
+      } else if (scene.endingType === "good") {
+        corruption = Math.max(0, corruption - 10);
+      } else if (scene.endingType === "secret") {
+        corruption = Math.max(0, corruption - 5);
+      }
+      updateCorruptionVisual();
+
+      if (scene.endingType === "good") {
+        statusTextEl.textContent = "You reached a good ending. The cabinet didn't win this time.";
+        playTone("good");
+      } else if (scene.endingType === "secret") {
+        statusTextEl.textContent = "Secret ending unlocked. You slipped through a crack in the rules.";
+        playTone("secret");
+      } else {
+        statusTextEl.textContent = "You died here. The cabinet remembers.";
+        playTone("bad");
+      }
+    } else {
+      // Non-ending scene
+      if (runCount >= 5) {
+        statusTextEl.textContent = "New Game+ active. The cabinet remembers every choice.";
+      } else {
+        statusTextEl.textContent = "Choose carefully. Some choices close doors forever (in the story).";
+      }
+    }
+
+    // Choices
+    choicesEl.innerHTML = "";
+    const baseOptions = (scene.options || []).slice();
+
+    // Hidden extra choice on the cabinet after you've played a few times
+    if (id === "cabinet" && runCount >= 3) {
+      baseOptions.push({
+        text: "Refuse the game. Step away from the cabinet.",
+        next: "hidden_cabinet_refusal",
+        sfxType: "secret"
+      });
+    }
+
+    baseOptions.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "choice-btn" + (scene.endingType ? " choice-btn-ending" : "");
+      btn.textContent = opt.text;
+      btn.addEventListener("click", () => {
+        if (!scene.endingType) {
+          playTone(opt.sfxType || "choice");
+        }
+        setScene(opt.next);
+      });
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  if (restartBtn) {
+    restartBtn.addEventListener("click", () => {
+      playTone("choice");
+      setScene("intro");
+    });
+  }
+
+  // ===== Hidden code at title screen: LASTCREDIT =====
+  const secretCode = "LASTCREDIT";
+  let codeBuffer = "";
+
+  window.addEventListener("keydown", (e) => {
+    // don't break anything if focus changes; we have no inputs anyway
+    if (!e.key || e.key.length !== 1) return;
+    const ch = e.key.toUpperCase();
+    codeBuffer += ch;
+    if (codeBuffer.length > secretCode.length) {
+      codeBuffer = codeBuffer.slice(-secretCode.length);
+    }
+
+    if (codeBuffer === secretCode && currentSceneId === "intro") {
+      const allSeen = allEndingSceneIds.every(id => !!seenEndings[id]);
+      if (allSeen) {
+        statusTextEl.textContent = "The cabinet recognizes the code. It shows you its real ledger.";
+        playTone("secret");
+        setScene("true_final");
+      } else {
+        statusTextEl.textContent = "Something in the cabinet stirs, but you haven't seen enough endings yet.";
+        playTone("creep");
+      }
+    }
+  });
+
+  // Initialize UI
+  updateEndingsUI();
+  updateCorruptionVisual();
+  setScene("intro");
+
+  // Start audio context on first click/tap
+  window.addEventListener("click", () => ensureAudio(), { once: true });
+})();
+</script>
+</body>
+</html>
