@@ -19,7 +19,7 @@ body.page-loaded {
     border-radius: 5px;
 }
 
-.cart {
+.navBtn {
   font-size: 24px;
   margin-right: 2px;
   margin-left: 10px;
@@ -65,7 +65,7 @@ body .item-img {
   transition: 0.3s ease;
 }
 
-.car-game-img:hover {
+.game-img:hover {
   filter: blur(2px);
 }
 

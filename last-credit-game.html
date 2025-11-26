@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>The Last Credit — Horror Arcade CYOA</title>
+<link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000000'/%3E%3Ctext x='50%25' y='50%25' dy='.35em' text-anchor='middle' font-size='40' fill='%23dc2626'%3EL%3C/text%3E%3C/svg%3E">
 
 <!-- Optional spooky display font -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,6 +51,13 @@
     overflow: hidden;
     border: 1px solid rgba(31,41,55,0.9);
   }
+
+  #game-wrapper.corrupt-high {
+  box-shadow:
+    0 0 70px rgba(0,0,0,0.98),
+    0 0 52px rgba(185,28,28,0.95),
+    0 0 12px rgba(248,113,113,0.9) inset;
+}
 
   /* New Game+ extra glow */
   #game-wrapper.ngplus {
@@ -488,14 +497,13 @@
     osc.stop(now + duration + 0.04);
   }
 
-  // ========= STORY DATA =========
+    // ========= STORY DATA =========
   // NOTE: Replace the `image:` paths with your own files
-  // (e.g. "images/intro.jpg", "images/cabinet.png", etc.)
 
   const scenes = {
     intro: {
       title: "AFTER HOURS",
-      image: "after-hours.png",
+      image: "after-hours.png", // ← swap to your own title art if you like
       artClass: "scene-arcade",
       text:
 `The old arcade shouldn't be open. The sign on the door is dark, the parking lot empty.
@@ -512,6 +520,7 @@ On its cracked screen, static crawls around a single line of text:
         { text: "Turn back. This is wrong. Leave now.", next: "leaving", sfxType: "creep" }
       ]
     },
+
     leaving: {
       title: "THE DOORS",
       image: "images/doors-placeholder.jpg",
@@ -533,6 +542,7 @@ Something that isn't a voice whispers:
         { text: "Pound on the wall and scream for help.", next: "bad_wall", sfxType: "bad" }
       ]
     },
+
     cabinet: {
       title: "THE LAST CREDIT",
       image: "images/cabinet-closeup-placeholder.jpg",
@@ -555,6 +565,7 @@ Two options blink on the screen:
         { text: "Insert the token. SUMMON ANOTHER PLAYER.", next: "summon", sfxType: "creep" }
       ]
     },
+
     bad_wall: {
       title: "BAD ENDING: ECHOED",
       image: "images/screaming-wall-placeholder.jpg",
@@ -576,6 +587,7 @@ To the next person who wanders in after midnight, it's just an attract mode: an 
         { text: "The scream resets. Start again.", next: "intro", sfxType: "bad" }
       ]
     },
+
     play_alone: {
       title: "SINGLE PLAYER",
       image: "images/maze-frontroom-placeholder.jpg",
@@ -600,6 +612,7 @@ A new prompt flickers:
         { text: "Start in the BACK HALL.", next: "back_hall", sfxType: "creep" }
       ]
     },
+
     summon: {
       title: "MULTIPLAYER",
       image: "images/multiplayer-glitch-placeholder.jpg",
@@ -626,6 +639,7 @@ A new choice appears:
         { text: "Invite WHO COMES AFTER (someone who hasn't arrived yet).", next: "after", sfxType: "choice" }
       ]
     },
+
     front_room: {
       title: "MIRROR CABINET",
       image: "images/front-room-mirror-placeholder.jpg",
@@ -650,6 +664,7 @@ A choice burns up from the bottom:
         { text: "SUBMIT. Let the joystick move your hands.", next: "bad_loop", sfxType: "bad" }
       ]
     },
+
     back_hall: {
       title: "THE BACK HALL",
       image: "images/back-hall-placeholder.jpg",
@@ -669,6 +684,7 @@ At the far end of the real hallway, a matching door waits — slightly open. Som
         { text: "REFUSE. Drop the joystick. Back away.", next: "secret_refuse", sfxType: "secret" }
       ]
     },
+
     before: {
       title: "WHO CAME BEFORE",
       image: "images/old-highscore-placeholder.jpg",
@@ -694,6 +710,7 @@ Another line types itself:
         { text: "Refuse. Tear your hands away from the controls.", next: "good_refuse", sfxType: "good" }
       ]
     },
+
     after: {
       title: "WHO COMES AFTER",
       image: "images/phone-call-placeholder.jpg",
@@ -718,6 +735,7 @@ Text crawls across the bottom:
         { text: "Warn them: 'It's not a game. Hang up.'", next: "good_warn", sfxType: "good" }
       ]
     },
+
     good_break: {
       title: "GOOD ENDING: POWER CUT",
       image: "images/power-cord-placeholder.jpg",
@@ -741,6 +759,7 @@ As you step into the night, the "Out of Order" sign on the arcade door rocks on 
         { text: "Walk away. The cabinet will hunt another town.", next: "intro", sfxType: "good" }
       ]
     },
+
     bad_loop: {
       title: "BAD ENDING: NESTED",
       image: "images/nesting-screens-placeholder.jpg",
@@ -762,6 +781,7 @@ They don't.`,
         { text: "Somebody else pushes START.", next: "intro", sfxType: "bad" }
       ]
     },
+
     bad_door: {
       title: "BAD ENDING: CONTINUE?",
       image: "images/back-room-door-placeholder.jpg",
@@ -787,6 +807,7 @@ You only ever feel its hand when you watch the replay later — from the inside.
         { text: "The hall resets when the next player enters.", next: "intro", sfxType: "bad" }
       ]
     },
+
     secret_refuse: {
       title: "SECRET ENDING: UNPLUGGED PLAYER",
       image: "images/secret-refuse-placeholder.jpg",
@@ -823,6 +844,7 @@ The only way to win was not to play.`,
         { text: "You weren't supposed to escape like that. Start again.", next: "intro", sfxType: "secret" }
       ]
     },
+
     bad_possession: {
       title: "BAD ENDING: PLAYER TWO",
       image: "images/possession-placeholder.jpg",
@@ -850,6 +872,7 @@ But you see them, sometimes, in demo mode.`,
         { text: "A new 'you' walks in.", next: "intro", sfxType: "bad" }
       ]
     },
+
     good_refuse: {
       title: "GOOD ENDING: DISCONNECT",
       image: "images/disconnect-placeholder.jpg",
@@ -887,6 +910,7 @@ You leave knowing someone else finally got to stop playing.`,
         { text: "Outside, the night feels less haunted. Begin again.", next: "intro", sfxType: "good" }
       ]
     },
+
     bad_lie: {
       title: "BAD ENDING: PATCH NOTES",
       image: "images/patch-notes-placeholder.jpg",
@@ -918,6 +942,7 @@ Your reflection keeps lagging half a second behind you, smiling when you don't.`
         { text: "Next time, tell the truth.", next: "intro", sfxType: "bad" }
       ]
     },
+
     good_warn: {
       title: "GOOD ENDING: WARNING SENT",
       image: "images/warning-sent-placeholder.jpg",
@@ -951,7 +976,6 @@ You saved someone you'll never meet.`,
       ]
     },
 
-    // Hidden cabinet refusal after several runs
     hidden_cabinet_refusal: {
       title: "SECRET ENDING: THE ONE WHO LEARNED",
       image: "images/hidden-refusal-placeholder.jpg",
@@ -995,7 +1019,6 @@ You have.`,
       ]
     },
 
-    // Super-secret TRUE ending (requires all endings + code at intro)
     true_final: {
       title: "TRUE ENDING: CABINET OF RECORD",
       image: "images/true-ending-placeholder.jpg",
@@ -1048,7 +1071,6 @@ Not with you.`,
     }
   };
 
-  // All distinct ending scenes, for "completion" tracking
   const allEndingSceneIds = [
     "bad_wall",
     "good_break",
@@ -1064,7 +1086,7 @@ Not with you.`,
 
   const ENDING_TYPES = ["good", "bad", "secret"];
 
-  // Load persistent state
+  // ========= PERSISTENT STATE =========
   let endingsFound = { good: false, bad: false, secret: false };
   let seenEndings = {};
   try {
@@ -1074,37 +1096,41 @@ Not with you.`,
     seenEndings = {};
   }
 
-  // total runs = number of times hit any ending
   let runCount = Number(localStorage.getItem("lastCreditRunCount") || 0);
 
   // corruption meter: influenced by endings
   let corruption = Number(localStorage.getItem("lastCreditCorruption") || 0);
   corruption = Math.max(0, Math.min(100, corruption));
 
+  function getCorruptionTier() {
+    if (corruption >= 70) return "high";
+    if (corruption >= 30) return "mid";
+    return "low";
+  }
+
   // ========= DOM ELEMENTS =========
-  const wrapperEl        = document.getElementById("game-wrapper");
-  const artFrameEl       = document.getElementById("art-frame");
-  const sceneTitleEl     = document.getElementById("scene-title");
-  const sceneTextEl      = document.getElementById("scene-text");
-  const choicesEl        = document.getElementById("choices");
-  const artInnerEl       = document.getElementById("art-inner");
-  const sceneImageEl     = document.getElementById("scene-image");
-  const metaEndingsEl    = document.getElementById("meta-endings");
-  const statusTextEl     = document.getElementById("status-text");
-  const restartBtn       = document.getElementById("restart-btn");
-  const corruptionMeterEl= document.getElementById("corruption-meter");
-  const tintOverlayEl    = artInnerEl.querySelector(".art-overlay-tint");
-  const shadowFigureEl   = document.getElementById("shadow-figure");
+  const wrapperEl         = document.getElementById("game-wrapper");
+  const artFrameEl        = document.getElementById("art-frame");
+  const sceneTitleEl      = document.getElementById("scene-title");
+  const sceneTextEl       = document.getElementById("scene-text");
+  const choicesEl         = document.getElementById("choices");
+  const artInnerEl        = document.getElementById("art-inner");
+  const sceneImageEl      = document.getElementById("scene-image");
+  const metaEndingsEl     = document.getElementById("meta-endings");
+  const statusTextEl      = document.getElementById("status-text");
+  const restartBtn        = document.getElementById("restart-btn");
+  const corruptionMeterEl = document.getElementById("corruption-meter");
+  const tintOverlayEl     = artInnerEl.querySelector(".art-overlay-tint");
+  const shadowFigureEl    = document.getElementById("shadow-figure");
 
   let currentSceneId = "intro";
 
+  // ========= UI HELPERS =========
   function updateEndingsUI() {
-    // Count unique endings seen
     const seenIds = Object.keys(seenEndings);
     const totalSeen = seenIds.length;
     const totalEndings = allEndingSceneIds.length;
 
-    // Count by type
     let goodCount = 0, badCount = 0, secretCount = 0;
     seenIds.forEach(id => {
       const sc = scenes[id];
@@ -1120,15 +1146,18 @@ Not with you.`,
   }
 
   function updateCorruptionVisual() {
-    // clamp and save
     corruption = Math.max(0, Math.min(100, corruption));
     localStorage.setItem("lastCreditCorruption", String(corruption));
 
+    const tier = getCorruptionTier();
+    let label = "stable";
+    if (tier === "mid") label = "unstable";
+    else if (tier === "high") label = "hostile";
+
     if (corruptionMeterEl) {
-      corruptionMeterEl.innerHTML = `Corruption: <strong>${corruption}%</strong>`;
+      corruptionMeterEl.innerHTML = `Corruption: <strong>${corruption}%</strong> (${label})`;
     }
 
-    // adjust art tint opacity based on corruption
     if (tintOverlayEl) {
       const level = corruption / 100;
       const base = 0.25;
@@ -1136,12 +1165,17 @@ Not with you.`,
       tintOverlayEl.style.opacity = (base + level * maxExtra).toFixed(2);
     }
 
-    // New Game+ visual
     if (wrapperEl) {
       if (runCount >= 5) {
         wrapperEl.classList.add("ngplus");
       } else {
         wrapperEl.classList.remove("ngplus");
+      }
+
+      if (tier === "high") {
+        wrapperEl.classList.add("corrupt-high");
+      } else {
+        wrapperEl.classList.remove("corrupt-high");
       }
     }
   }
@@ -1152,17 +1186,47 @@ Not with you.`,
     setTimeout(() => artFrameEl.classList.remove("static-flash"), 230);
   }
 
+  // corruption-driven extra choices
+  function maybeInjectCorruptionChoice(sceneId, options, scene) {
+    const tier = getCorruptionTier();
+    if (scene.endingType) return options;
+
+    // Mid corruption: extra creepy but "soft" choices
+    if (tier === "mid") {
+      if ((sceneId === "intro" || sceneId === "leaving") && Math.random() < 0.35) {
+        options.push({
+          text: "Listen. Something is breathing between the machines.",
+          next: "cabinet",
+          sfxType: "creep"
+        });
+      }
+    }
+
+    // High corruption: sometimes the cabinet hijacks your run:
+    if (tier === "high" && Math.random() < 0.25) {
+      const badTargets = ["bad_wall", "bad_loop", "bad_door", "bad_possession", "bad_lie"];
+      const target = badTargets[Math.floor(Math.random() * badTargets.length)];
+      options.push({
+        text: "You feel the joystick move on its own…",
+        next: target,
+        sfxType: "bad"
+      });
+    }
+
+    return options;
+  }
+
+  // ========= SCENE RENDER =========
   function setScene(id) {
     const scene = scenes[id];
     if (!scene) return;
     currentSceneId = id;
 
-    // static glitch transition on scene change
     triggerStaticFlash();
 
     // Title & text
     sceneTitleEl.textContent = scene.title || "";
-    sceneTextEl.textContent = scene.text || "";
+    sceneTextEl.textContent  = scene.text  || "";
 
     // Image + art class
     const artClass = scene.artClass || "scene-arcade";
@@ -1177,23 +1241,28 @@ Not with you.`,
       sceneImageEl.style.display = "none";
     }
 
-    // Shadow figure — random ghost watcher (after at least 1 ending)
+    // Shadow figure — corruption-driven watcher
     if (shadowFigureEl) {
-      if (!scene.endingType && runCount > 0 && Math.random() < 0.25) {
+      const tier = getCorruptionTier();
+      let chance = 0;
+      if (tier === "low") chance = 0.15;
+      else if (tier === "mid") chance = 0.3;
+      else chance = 0.6;
+
+      if (!scene.endingType && runCount > 0 && Math.random() < chance) {
         shadowFigureEl.style.display = "block";
-        const leftPercent = 20 + Math.random() * 60; // 20% - 80%
+        const leftPercent = 15 + Math.random() * 70;
         shadowFigureEl.style.left = leftPercent + "%";
       } else {
         shadowFigureEl.style.display = "none";
       }
     }
 
-    // Ending tracking + run count + corruption
+    // Handle endings vs non-endings
     if (scene.endingType) {
       runCount++;
       localStorage.setItem("lastCreditRunCount", String(runCount));
 
-      // Mark this specific ending as seen
       if (!seenEndings[id]) {
         seenEndings[id] = true;
         try {
@@ -1204,7 +1273,6 @@ Not with you.`,
       endingsFound[scene.endingType] = true;
       updateEndingsUI();
 
-      // corruption changes
       if (scene.endingType === "bad") {
         corruption = Math.min(100, corruption + 15);
       } else if (scene.endingType === "good") {
@@ -1225,19 +1293,45 @@ Not with you.`,
         playTone("bad");
       }
     } else {
-      // Non-ending scene
+      // Non-ending scenes: corruption-reactive status text + whispers
+      const tier = getCorruptionTier();
+
       if (runCount >= 5) {
         statusTextEl.textContent = "New Game+ active. The cabinet remembers every choice.";
-      } else {
+      } else if (tier === "low") {
         statusTextEl.textContent = "Choose carefully. Some choices close doors forever (in the story).";
+      } else if (tier === "mid") {
+        statusTextEl.textContent = "The runs are starting to blur together. The cabinet is learning you.";
+      } else {
+        statusTextEl.textContent = "The cabinet is hostile now. It will occasionally choose for you.";
+      }
+
+      if (runCount > 0 && Math.random() < 0.2) {
+        const whispersLow = [
+          "You could still walk away. You just never do.",
+          "The tokens always find their way back to you."
+        ];
+        const whispersMid = [
+          "Some endings are starting to repeat in the cabinet's memory.",
+          "Your reflection lags half a second behind your choices."
+        ];
+        const whispersHigh = [
+          "It already knows which ending you pick next.",
+          "You’re not choosing; you’re reenacting.",
+          "Sometimes the cabinet moves before you touch it."
+        ];
+        let pool = whispersLow;
+        if (tier === "mid") pool = whispersMid;
+        if (tier === "high") pool = whispersHigh;
+        statusTextEl.textContent = pool[Math.floor(Math.random() * pool.length)];
       }
     }
 
     // Choices
     choicesEl.innerHTML = "";
-    const baseOptions = (scene.options || []).slice();
+    let baseOptions = (scene.options || []).slice();
 
-    // Hidden extra choice on the cabinet after you've played a few times
+    // Hidden cabinet refusal after 3+ runs
     if (id === "cabinet" && runCount >= 3) {
       baseOptions.push({
         text: "Refuse the game. Step away from the cabinet.",
@@ -1246,21 +1340,33 @@ Not with you.`,
       });
     }
 
+    // Corruption-driven injections
+    baseOptions = maybeInjectCorruptionChoice(id, baseOptions, scene);
+
+    const tierForChoices = getCorruptionTier();
     baseOptions.forEach((opt) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn" + (scene.endingType ? " choice-btn-ending" : "");
-      btn.textContent = opt.text;
+
+      let label = opt.text;
+      if (!scene.endingType && tierForChoices === "high" && Math.random() < 0.3) {
+        label = label.replace(/[AEIOUaeiou]/g, "▇");
+      }
+      btn.textContent = label;
+
       btn.addEventListener("click", () => {
         if (!scene.endingType) {
           playTone(opt.sfxType || "choice");
         }
         setScene(opt.next);
       });
+
       choicesEl.appendChild(btn);
     });
   }
 
+  // ========= RESTART BUTTON =========
   if (restartBtn) {
     restartBtn.addEventListener("click", () => {
       playTone("choice");
@@ -1268,12 +1374,11 @@ Not with you.`,
     });
   }
 
-  // ===== Hidden code at title screen: LASTCREDIT =====
+  // ========= SECRET CODE: LASTCREDIT =========
   const secretCode = "LASTCREDIT";
   let codeBuffer = "";
 
   window.addEventListener("keydown", (e) => {
-    // don't break anything if focus changes; we have no inputs anyway
     if (!e.key || e.key.length !== 1) return;
     const ch = e.key.toUpperCase();
     codeBuffer += ch;
@@ -1294,7 +1399,7 @@ Not with you.`,
     }
   });
 
-  // Initialize UI
+  // ========= INIT =========
   updateEndingsUI();
   updateCorruptionVisual();
   setScene("intro");
@@ -1303,5 +1408,6 @@ Not with you.`,
   window.addEventListener("click", () => ensureAudio(), { once: true });
 })();
 </script>
+
 </body>
 </html>
