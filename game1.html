@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moon Memory Game</title>
+
+  <style>
+    .moon-game {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, #f5f0ff, #1b1024);
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    }
+
+    .moon-game h2 {
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .moon-game p {
+      text-align: center;
+      margin: 0.25rem 0;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .moon-game-stats {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.9rem;
+    }
+
+    .moon-game-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(60px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .moon-card {
+      aspect-ratio: 3 / 4;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #2b1838, #4c295f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+      user-select: none;
+    }
+
+    .moon-card-inner {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+    }
+
+    .moon-card-back {
+      background: radial-gradient(circle at top, #f5e9ff, #3c214f);
+      color: #1b1024;
+      font-size: 1.8rem;
+    }
+
+    .moon-card-front {
+      transform: rotateY(180deg);
+      font-size: 2.2rem;
+    }
+
+    .moon-card.flipped {
+      transform: rotateY(180deg);
+      box-shadow: 0 0 14px rgba(255,255,255,0.7);
+    }
+
+    .moon-card.matched {
+      cursor: default;
+      box-shadow: 0 0 18px rgba(157, 246, 255, 0.9);
+    }
+
+    .moon-game-footer {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .moon-game button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.4rem 1.1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, #9f5bff, #ff7ce0);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.4);
+    }
+
+    .moon-game button:hover {
+      filter: brightness(1.05);
+    }
+
+    .moon-game button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 7px rgba(0,0,0,0.5);
+    }
+
+    .moon-game-win {
+      text-align: center;
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: #ffe6ff;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 480px) {
+      .moon-game {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="moon-game">
+    <h2>🌙 Moon Memory</h2>
+    <p>Flip two cards at a time. Match all the pairs to win.</p>
+
+    <div class="moon-game-stats">
+      <span>Moves: <strong id="moonGameMoves">0</strong></span>
+      <span>Matches: <strong id="moonGameMatches">0 / 8</strong></span>
+    </div>
+
+    <div class="moon-game-grid" id="moonGameGrid">
+      <!-- Cards will be created by JS -->
+    </div>
+
+    <div class="moon-game-footer">
+      <button id="moonGameReset">🔁 Restart Game</button>
+    </div>
+
+    <div class="moon-game-win" id="moonGameWinMessage"></div>
+  </div>
+
+  <script>
+    (function () {
+      const symbols = ["🌙", "⭐", "🔮", "🕯️", "🧿", "🌑", "🌕", "🪽"];
+      const gridEl = document.getElementById("moonGameGrid");
+      const movesEl = document.getElementById("moonGameMoves");
+      const matchesEl = document.getElementById("moonGameMatches");
+      const resetBtn = document.getElementById("moonGameReset");
+      const winMessageEl = document.getElementById("moonGameWinMessage");
+
+      let deck = [];
+      let flipped = [];
+      let lockBoard = false;
+      let moves = 0;
+      let matches = 0;
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function createDeck() {
+        const doubled = [...symbols, ...symbols];
+        return shuffle(doubled).map((symbol, index) => ({
+          id: index,
+          symbol,
+          matched: false
+        }));
+      }
+
+      function renderGrid() {
+        gridEl.innerHTML = "";
+        deck.forEach(card => {
+          const cardEl = document.createElement("div");
+          cardEl.className = "moon-card";
+          cardEl.dataset.id = card.id;
+
+          const backEl = document.createElement("div");
+          backEl.className = "moon-card-inner moon-card-back";
+          backEl.textContent = "❈";
+
+          const frontEl = document.createElement("div");
+          frontEl.className = "moon-card-inner moon-card-front";
+          frontEl.textContent = card.symbol;
+
+          cardEl.appendChild(backEl);
+          cardEl.appendChild(frontEl);
+
+          cardEl.addEventListener("click", () => handleCardClick(cardEl, card));
+          gridEl.appendChild(cardEl);
+        });
+      }
+
+      function handleCardClick(cardEl, card) {
+        if (lockBoard) return;
+        if (card.matched) return;
+        if (flipped.some(c => c.id === card.id)) return;
+
+        cardEl.classList.add("flipped");
+        flipped.push(card);
+
+        if (flipped.length === 2) {
+          moves++;
+          movesEl.textContent = moves;
+          checkMatch();
+        }
+      }
+
+      function checkMatch() {
+        const [first, second] = flipped;
+        const firstEl = gridEl.querySelector(`.moon-card[data-id="${first.id}"]`);
+        const secondEl = gridEl.querySelector(`.moon-card[data-id="${second.id}"]`);
+
+        if (first.symbol === second.symbol) {
+          first.matched = true;
+          second.matched = true;
+          firstEl.classList.add("matched");
+          secondEl.classList.add("matched");
+          flipped = [];
+          matches++;
+          matchesEl.textContent = `${matches} / ${symbols.length}`;
+          checkWin();
+        } else {
+          lockBoard = true;
+          setTimeout(() => {
+            firstEl.classList.remove("flipped");
+            secondEl.classList.remove("flipped");
+            flipped = [];
+            lockBoard = false;
+          }, 700);
+        }
+      }
+
+      function checkWin() {
+        if (matches === symbols.length) {
+          winMessageEl.textContent = `✨ You did it in ${moves} moves! ✨`;
+        }
+      }
+
+      function resetGame() {
+        moves = 0;
+        matches = 0;
+        flipped = [];
+        lockBoard = false;
+        movesEl.textContent = "0";
+        matchesEl.textContent = `0 / ${symbols.length}`;
+        winMessageEl.textContent = "";
+        deck = createDeck();
+        renderGrid();
+      }
+
+      resetBtn.addEventListener("click", resetGame);
+
+      // Start game
+      resetGame();
+    })();
+  </script>
+
+</body>
+</html>
