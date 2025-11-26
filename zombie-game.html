@@ -3,558 +3,556 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Zombie Shooter+</title>
+<title>Zombie Shooter+ (Chill Mode)</title>
 
 <style>
-  body {
-    margin: 0;
-    background: radial-gradient(circle at top, #020617, #02030a);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    font-family: system-ui, sans-serif;
-    color: #f9fafb;
-  }
-  #gameWrapper {
-    background: rgba(15,15,24,0.96);
-    padding: 1rem;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.85);
-    text-align: center;
-    max-width: 440px;
-    width: 100%;
-  }
-  h2 {
-    margin: 0 0 0.25rem;
-    font-size: 1.2rem;
-  }
-  .subtitle {
-    font-size: 0.85rem;
-    opacity: 0.8;
-    margin-bottom: 0.5rem;
-  }
-  canvas {
-    border-radius: 10px;
-    background: #020617;
-    display: block;
-    margin: 0.25rem auto;
-  }
-  .stats {
-    margin-top: 0.3rem;
-    color: #e5e7eb;
-    font-size: 0.85rem;
-  }
-  .stats strong {
-    font-weight: 600;
-  }
-  .stats-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.2rem;
-  }
-  button#muteBtn {
-    margin-top: 0.25rem;
-    border-radius: 999px;
-    border: none;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    background: #111827;
-    color: #e5e7eb;
-  }
+    body {
+        margin: 0;
+        background: radial-gradient(circle at top, #020617, #02030a);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: system-ui, sans-serif;
+        color: #f9fafb;
+    }
+    #gameWrapper {
+        background: rgba(15,15,24,0.96);
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.85);
+        text-align: center;
+        max-width: 440px;
+        width: 100%;
+    }
+    h2 {
+        margin: 0 0 0.25rem;
+        font-size: 1.2rem;
+    }
+    .subtitle {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        margin-bottom: 0.5rem;
+    }
+    canvas {
+        border-radius: 8px;
+        background: #020617;
+        display: block;
+        margin: 0.25rem auto;
+    }
+    .stats {
+        margin-top: 0.3rem;
+        color: #e5e7eb;
+        font-size: 0.85rem;
+    }
+    .stats-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.2rem;
+    }
+    .stats strong {
+        font-weight: 600;
+    }
+    button#muteBtn {
+        margin-top: 0.25rem;
+        border-radius: 999px;
+        border: none;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        background: #111827;
+        color: #e5e7eb;
+    }
 </style>
 </head>
 <body>
 
 <div id="gameWrapper">
-  <h2>🧟‍♂️ Zombie Shooter+</h2>
-  <div class="subtitle">
-    Click/tap zombies before they reach you. Headshots give bonus points. <br>
-    Boss every 20 kills. Grab power-ups: Freeze & Rapid Fire!
-  </div>
-
-  <div class="stats">
-    <div class="stats-row">
-      <span>Score: <strong id="score">0</strong></span>
-      <span>Best: <strong id="best">0</strong></span>
+    <h2>🧟‍♂️ Zombie Shooter+ (Chill)</h2>
+    <div class="subtitle">
+        Click/tap zombies before they reach you. Headshots give bonus points.<br>
+        Boss every 20 kills. Freeze & Rapid power-ups. Tuned to survive longer.
     </div>
-    <div class="stats-row">
-      <span>Kills: <strong id="kills">0</strong></span>
-      <span>Speed: <strong id="speed">1.0x</strong></span>
-    </div>
-    <div class="stats-row">
-      <span>Freeze: <strong id="freezeStatus">–</strong></span>
-      <span>Rapid: <strong id="rapidStatus">–</strong></span>
-    </div>
-  </div>
 
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div class="stats">
+        <div class="stats-row">
+            <span>Score: <strong id="score">0</strong></span>
+            <span>Best: <strong id="best">0</strong></span>
+        </div>
+        <div class="stats-row">
+            <span>Kills: <strong id="kills">0</strong></span>
+            <span>Speed: <strong id="speed">1.0x</strong></span>
+        </div>
+        <div class="stats-row">
+            <span>Freeze: <strong id="freezeStatus">–</strong></span>
+            <span>Rapid: <strong id="rapidStatus">–</strong></span>
+        </div>
+    </div>
 
-  <div class="stats">
-    <small>Click to shoot. Click again (or press Space) after death to restart.</small><br>
-    <button id="muteBtn">🔊 Sound: On</button>
-  </div>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <div class="stats">
+        <small>Click to shoot. Click again (or press Space) after death to restart.</small><br>
+        <button id="muteBtn">🔊 Sound: On</button>
+    </div>
 </div>
 
 <script>
 (() => {
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-  const scoreEl  = document.getElementById("score");
-  const bestEl   = document.getElementById("best");
-  const killsEl  = document.getElementById("kills");
-  const speedEl  = document.getElementById("speed");
-  const freezeEl = document.getElementById("freezeStatus");
-  const rapidEl  = document.getElementById("rapidStatus");
-  const muteBtn  = document.getElementById("muteBtn");
+    const scoreEl  = document.getElementById("score");
+    const bestEl   = document.getElementById("best");
+    const killsEl  = document.getElementById("kills");
+    const speedEl  = document.getElementById("speed");
+    const freezeEl = document.getElementById("freezeStatus");
+    const rapidEl  = document.getElementById("rapidStatus");
+    const muteBtn  = document.getElementById("muteBtn");
 
-  const W = canvas.width;
-  const H = canvas.height;
+    const W = canvas.width;
+    const H = canvas.height;
 
-  // GAME STATE
-  let zombies = [];
-  let powerUps = [];
-  let score = 0;
-  let best  = Number(localStorage.getItem("bestZombieShooterPlus") || 0);
-  let kills = 0;
-  let gameOver = false;
+    // GAME STATE
+    let zombies = [];
+    let powerUps = [];
+    let score = 0;
+    let best  = Number(localStorage.getItem("bestZombieShooterPlusChill") || 0);
+    let kills = 0;
+    let gameOver = false;
 
-  let spawnTimer = 0;
-  let spawnInterval = 1000;     // ms
-  let speedMultiplier = 1;
+    let spawnTimer = 0;
+    let spawnInterval = 1300; // a bit slower
+    let speedMultiplier = 1;
 
-  // Background scroll
-  let bgOffset = 0;
+    // Background scroll
+    let bgOffset = 0;
 
-  // Power-ups
-  let freezeTimeLeft = 0;       // ms
-  let rapidTimeLeft  = 0;       // ms
-  const FREEZE_DURATION = 4000;
-  const RAPID_DURATION  = 4000;
+    // Power-ups
+    let freezeTimeLeft = 0;       // ms
+    let rapidTimeLeft  = 0;       // ms
+    const FREEZE_DURATION = 5000; // slightly longer
+    const RAPID_DURATION  = 5000;
 
-  // Boss logic
-  let killsSinceBoss = 0;
+    // Boss logic
+    let killsSinceBoss = 0;
 
-  bestEl.textContent = best;
+    bestEl.textContent = best;
 
-  // SIMPLE SOUND EFFECTS (synth beeps)
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  let audioCtx = null;
-  let muted = false;
+    // SIMPLE SOUND EFFECTS
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let muted = false;
 
-  function initAudio() {
-    if (!audioCtx) {
-      try {
-        audioCtx = new AudioContext();
-      } catch (e) {
-        audioCtx = null;
-      }
-    }
-  }
-
-  function playBeep(type) {
-    if (muted || !AudioContext) return;
-    initAudio();
-    if (!audioCtx) return;
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    let freq = 440;
-    let duration = 0.12;
-    switch (type) {
-      case "shoot":  freq = 650; duration = 0.08; break;
-      case "hit":    freq = 320; duration = 0.1;  break;
-      case "head":   freq = 520; duration = 0.12; break;
-      case "power":  freq = 780; duration = 0.15; break;
-      case "boss":   freq = 260; duration = 0.2;  break;
-      case "over":   freq = 180; duration = 0.3;  break;
+    function initAudio() {
+        if (!audioCtx && AudioContext) {
+            try {
+                audioCtx = new AudioContext();
+            } catch (e) {
+                audioCtx = null;
+            }
+        }
     }
 
-    osc.frequency.value = freq;
-    gain.gain.value = 0.2;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    function playBeep(type) {
+        if (muted || !AudioContext) return;
+        initAudio();
+        if (!audioCtx) return;
 
-    const now = audioCtx.currentTime;
-    osc.start(now);
-    osc.stop(now + duration);
-  }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-  muteBtn.addEventListener("click", () => {
-    muted = !muted;
-    muteBtn.textContent = muted ? "🔈 Sound: Off" : "🔊 Sound: On";
-  });
-
-  // ZOMBIES & POWER-UPS
-
-  function spawnZombie(isBoss = false) {
-    const margin = 30;
-    const x = Math.random() * (W - margin * 2) + margin;
-
-    if (isBoss) {
-      zombies.push({
-        x,
-        y: -80,
-        size: 70,
-        speed: 55 * speedMultiplier,
-        hp: 6,
-        boss: true
-      });
-      playBeep("boss");
-    } else {
-      zombies.push({
-        x,
-        y: -40,
-        size: 40,
-        speed: (55 + Math.random() * 65) * speedMultiplier,
-        hp: 1,
-        boss: false
-      });
-    }
-  }
-
-  function spawnPowerUp(x, y, type) {
-    powerUps.push({
-      x,
-      y,
-      radius: 14,
-      type,       // "freeze" or "rapid"
-      vy: 80
-    });
-  }
-
-  // DRAWING
-
-  function drawBackground(dt) {
-    const scrollSpeed = 40 * speedMultiplier;
-    bgOffset += scrollSpeed * dt / 1000;
-    if (bgOffset > 40) bgOffset -= 40;
-
-    // dark base
-    ctx.fillStyle = "#020617";
-    ctx.fillRect(0, 0, W, H);
-
-    // moving fog stripes
-    ctx.fillStyle = "rgba(15,23,42,0.8)";
-    for (let i = -1; i < 20; i++) {
-      const y = (i * 40 + bgOffset);
-      ctx.fillRect(0, y, W, 20);
-    }
-
-    // faint horizon glow
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "rgba(148,163,184,0.3)");
-    g.addColorStop(0.2, "rgba(15,23,42,0.0)");
-    g.addColorStop(1, "rgba(0,0,0,0.0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  function drawZombie(z) {
-    ctx.save();
-    ctx.translate(z.x, z.y);
-
-    const size = z.size;
-    const half = size / 2;
-
-    // Body
-    ctx.fillStyle = z.boss ? "#a3e635" : "#6fbf73";
-    ctx.fillRect(-half, -half, size, size);
-
-    // Head region (top third)
-    ctx.fillStyle = z.boss ? "#bef264" : "#9ae6b4";
-    const headHeight = size * 0.35;
-    ctx.fillRect(-half + 4, -half + 4, size - 8, headHeight - 4);
-
-    // Eyes
-    ctx.fillStyle = "#fff";
-    const eyeY = -half + headHeight * 0.4;
-    const eyeSize = size * 0.16;
-    ctx.fillRect(-eyeSize - 4, eyeY - eyeSize / 2, eyeSize, eyeSize);
-    ctx.fillRect(4, eyeY - eyeSize / 2, eyeSize, eyeSize);
-
-    ctx.fillStyle = "#000";
-    const pupil = eyeSize * 0.4;
-    ctx.fillRect(-pupil - 4, eyeY - pupil / 2, pupil, pupil);
-    ctx.fillRect(4, eyeY - pupil / 2, pupil, pupil);
-
-    // Mouth
-    ctx.fillStyle = "#111827";
-    ctx.fillRect(-size * 0.25, half - size * 0.28, size * 0.5, size * 0.15);
-
-    ctx.restore();
-  }
-
-  function drawPowerUp(p) {
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.beginPath();
-    ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = p.type === "freeze"
-      ? "rgba(59,130,246,0.9)"
-      : "rgba(249,115,22,0.9)";
-    ctx.fill();
-
-    ctx.fillStyle = "#e5e7eb";
-    ctx.font = "bold 14px system-ui";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(p.type === "freeze" ? "❄" : "⚡", 0, 1);
-    ctx.restore();
-  }
-
-  function drawOverlay() {
-    if (!gameOver) return;
-
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = "#f9fafb";
-    ctx.textAlign = "center";
-
-    ctx.font = "bold 34px system-ui";
-    ctx.fillText("GAME OVER", W / 2, H / 2 - 25);
-
-    ctx.font = "16px system-ui";
-    ctx.fillText(`Score: ${Math.floor(score)}  |  Best: ${best}`, W / 2, H / 2 + 5);
-    ctx.font = "14px system-ui";
-    ctx.fillText("Click or press Space to restart", W / 2, H / 2 + 30);
-  }
-
-  // UPDATE
-
-  function update(dt) {
-    if (gameOver) return;
-
-    // Timers
-    if (freezeTimeLeft > 0) {
-      freezeTimeLeft -= dt;
-      if (freezeTimeLeft < 0) freezeTimeLeft = 0;
-    }
-    if (rapidTimeLeft > 0) {
-      rapidTimeLeft -= dt;
-      if (rapidTimeLeft < 0) rapidTimeLeft = 0;
-    }
-
-    freezeEl.textContent = freezeTimeLeft > 0 ? (freezeTimeLeft / 1000).toFixed(1) + "s" : "–";
-    rapidEl.textContent  = rapidTimeLeft  > 0 ? (rapidTimeLeft  / 1000).toFixed(1) + "s" : "–";
-
-    // Score & difficulty
-    const difficultyFactor = 1 + score / 250;
-    speedMultiplier = difficultyFactor;
-
-    if (freezeTimeLeft > 0) {
-      // Slow everything when frozen
-      speedMultiplier *= 0.25;
-    }
-
-    spawnInterval = 1100 / difficultyFactor;
-    speedEl.textContent = difficultyFactor.toFixed(1) + "x";
-
-    score += dt * 0.01 * difficultyFactor;
-    scoreEl.textContent = Math.floor(score);
-
-    // Spawn zombies
-    spawnTimer += dt;
-    if (spawnTimer >= spawnInterval) {
-      spawnTimer = 0;
-      spawnZombie(false);
-    }
-
-    // Move zombies
-    zombies.forEach(z => {
-      z.y += z.speed * (speedMultiplier) * dt / 1000;
-    });
-
-    // Move power-ups
-    powerUps.forEach(p => {
-      p.y += p.vy * dt / 1000;
-    });
-
-    // Cleanup power-ups off screen
-    powerUps = powerUps.filter(p => p.y < H + 40);
-
-    // Loss if any zombie hits bottom
-    for (const z of zombies) {
-      if (z.y > H - z.size * 0.3) {
-        endGame();
-        return;
-      }
-    }
-
-    // Remove zombies that wander far off (just in case)
-    zombies = zombies.filter(z => z.y < H + 100);
-  }
-
-  // COLLISION + CLICK HANDLING
-
-  function handleClick(x, y) {
-    if (gameOver) {
-      restart();
-      return;
-    }
-
-    // First: check for power-up click
-    for (let i = powerUps.length - 1; i >= 0; i--) {
-      const p = powerUps[i];
-      const dx = x - p.x;
-      const dy = y - p.y;
-      if (Math.hypot(dx, dy) <= p.radius) {
-        applyPowerUp(p.type);
-        powerUps.splice(i, 1);
-        playBeep("power");
-        return;
-      }
-    }
-
-    // Next: zombie hits
-    let hitSomething = false;
-
-    for (let i = zombies.length - 1; i >= 0; i--) {
-      const z = zombies[i];
-      const half = z.size / 2;
-
-      if (x >= z.x - half && x <= z.x + half &&
-          y >= z.y - half && y <= z.y + half) {
-
-        // Determine headshot vs body
-        const headTop    = z.y - half;
-        const headBottom = headTop + z.size * 0.35;
-        const isHeadshot = y >= headTop && y <= headBottom;
-
-        const damage      = rapidTimeLeft > 0 ? (isHeadshot ? 3 : 2) : 1;
-        const basePoints  = z.boss ? 6 : 1;
-        const headBonus   = isHeadshot ? (z.boss ? 8 : 2) : 0;
-
-        z.hp -= damage;
-
-        if (z.hp <= 0) {
-          // kill
-          zombies.splice(i, 1);
-          kills++;
-          killsSinceBoss++;
-          killsEl.textContent = kills;
-
-          let points = basePoints + headBonus;
-          score += points;
-          scoreEl.textContent = Math.floor(score);
-
-          // Chance to drop power-up
-          let dropChance = z.boss ? 0.8 : 0.18;
-          if (Math.random() < dropChance) {
-            const type = Math.random() < 0.5 ? "freeze" : "rapid";
-            spawnPowerUp(z.x, z.y, type);
-          }
-
-          // Boss spawn logic
-          if (killsSinceBoss >= 20) {
-            killsSinceBoss = 0;
-            setTimeout(() => spawnZombie(true), 200); // small delay
-          }
-
-          playBeep(isHeadshot ? "head" : "hit");
-        } else {
-          // just damaged
-          playBeep("hit");
+        let freq = 440;
+        let duration = 0.12;
+        switch (type) {
+            case "shoot":  freq = 650; duration = 0.08; break;
+            case "hit":    freq = 320; duration = 0.1;  break;
+            case "head":   freq = 520; duration = 0.12; break;
+            case "power":  freq = 780; duration = 0.15; break;
+            case "boss":   freq = 260; duration = 0.2;  break;
+            case "over":   freq = 180; duration = 0.3;  break;
         }
 
-        hitSomething = true;
-        break;
-      }
+        osc.frequency.value = freq;
+        gain.gain.value = 0.2;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        osc.start(now);
+        osc.stop(now + duration);
     }
 
-    if (!hitSomething) {
-      playBeep("shoot");
+    muteBtn.addEventListener("click", () => {
+        muted = !muted;
+        muteBtn.textContent = muted ? "🔈 Sound: Off" : "🔊 Sound: On";
+    });
+
+    // ZOMBIES & POWER UPS
+
+    function spawnZombie(isBoss = false) {
+        const margin = 30;
+        const x = Math.random() * (W - margin * 2) + margin;
+
+        if (isBoss) {
+            zombies.push({
+                x,
+                y: -80,
+                size: 70,
+                speed: 40,  // slower boss
+                hp: 6,
+                boss: true
+            });
+            playBeep("boss");
+        } else {
+            zombies.push({
+                x,
+                y: -40,
+                size: 40,
+                speed: 40 + Math.random() * 30, // slower regular
+                hp: 1,
+                boss: false
+            });
+        }
     }
-  }
 
-  function applyPowerUp(type) {
-    if (type === "freeze") {
-      freezeTimeLeft = FREEZE_DURATION;
-    } else if (type === "rapid") {
-      rapidTimeLeft = RAPID_DURATION;
+    function spawnPowerUp(x, y, type) {
+        powerUps.push({
+            x,
+            y,
+            radius: 14,
+            type,
+            vy: 70
+        });
     }
-  }
 
-  // GAME OVER / RESTART
+    // DRAWING
 
-  function endGame() {
-    if (gameOver) return;
-    gameOver = true;
-    playBeep("over");
+    function drawBackground(dt) {
+        // slower background scroll
+        const scrollSpeed = 30 * speedMultiplier;
+        bgOffset += scrollSpeed * dt / 1000;
+        if (bgOffset > 40) bgOffset -= 40;
 
-    const finalScore = Math.floor(score);
-    if (finalScore > best) {
-      best = finalScore;
-      bestEl.textContent = best;
-      localStorage.setItem("bestZombieShooterPlus", best);
+        // dark base
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, W, H);
+
+        // moving fog stripes
+        ctx.fillStyle = "rgba(15,23,42,0.8)";
+        for (let i = -1; i < 20; i++) {
+            const y = (i * 40 + bgOffset);
+            ctx.fillRect(0, y, W, 20);
+        }
+
+        // faint horizon glow
+        const g = ctx.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, "rgba(148,163,184,0.3)");
+        g.addColorStop(0.2, "rgba(15,23,42,0.0)");
+        g.addColorStop(1, "rgba(0,0,0,0.0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
     }
-  }
 
-  function restart() {
-    zombies = [];
-    powerUps = [];
-    score = 0;
-    kills = 0;
-    killsSinceBoss = 0;
-    spawnInterval = 1000;
-    speedMultiplier = 1;
-    freezeTimeLeft = 0;
-    rapidTimeLeft  = 0;
-    gameOver = false;
-    scoreEl.textContent = "0";
-    killsEl.textContent = "0";
-  }
+    function drawZombie(z) {
+        ctx.save();
+        ctx.translate(z.x, z.y);
 
-  // INPUT EVENTS
+        const size = z.size;
+        const half = size / 2;
 
-  canvas.addEventListener("click", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    handleClick(x, y);
-  });
+        // Body
+        ctx.fillStyle = z.boss ? "#a3e635" : "#6fbf73";
+        ctx.fillRect(-half, -half, size, size);
 
-  canvas.addEventListener("touchstart", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const t = e.touches[0];
-    const x = t.clientX - rect.left;
-    const y = t.clientY - rect.top;
-    handleClick(x, y);
-  }, { passive: true });
+        // Head region (top third)
+        ctx.fillStyle = z.boss ? "#bef264" : "#9ae6b4";
+        const headHeight = size * 0.35;
+        ctx.fillRect(-half + 4, -half + 4, size - 8, headHeight - 4);
 
-  window.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
-      e.preventDefault();
-      if (gameOver) {
-        restart();
-      }
+        // Eyes
+        ctx.fillStyle = "#fff";
+        const eyeY = -half + headHeight * 0.4;
+        const eyeSize = size * 0.16;
+        ctx.fillRect(-eyeSize - 4, eyeY - eyeSize / 2, eyeSize, eyeSize);
+        ctx.fillRect(4, eyeY - eyeSize / 2, eyeSize, eyeSize);
+
+        ctx.fillStyle = "#000";
+        const pupil = eyeSize * 0.4;
+        ctx.fillRect(-pupil - 4, eyeY - pupil / 2, pupil, pupil);
+        ctx.fillRect(4, eyeY - pupil / 2, pupil, pupil);
+
+        // Mouth
+        ctx.fillStyle = "#111827";
+        ctx.fillRect(-size * 0.25, half - size * 0.28, size * 0.5, size * 0.15);
+
+        ctx.restore();
     }
-  });
 
-  // MAIN LOOP
+    function drawPowerUp(p) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.type === "freeze"
+            ? "rgba(59,130,246,0.9)"
+            : "rgba(249,115,22,0.9)";
+        ctx.fill();
 
-  let lastTime = 0;
-  function loop(timestamp) {
-    if (!lastTime) lastTime = timestamp;
-    const dt = timestamp - lastTime;
-    lastTime = timestamp;
+        ctx.fillStyle = "#e5e7eb";
+        ctx.font = "bold 14px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(p.type === "freeze" ? "❄" : "⚡", 0, 1);
+        ctx.restore();
+    }
 
-    drawBackground(dt);
-    update(dt);
+    function drawOverlay() {
+        if (!gameOver) return;
 
-    // Draw zombies & power-ups
-    zombies.forEach(drawZombie);
-    powerUps.forEach(drawPowerUp);
-    drawOverlay();
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = "#f9fafb";
+        ctx.textAlign = "center";
+
+        ctx.font = "bold 34px system-ui";
+        ctx.fillText("GAME OVER", W / 2, H / 2 - 25);
+
+        ctx.font = "16px system-ui";
+        ctx.fillText(`Score: ${Math.floor(score)}  |  Best: ${best}`, W / 2, H / 2 + 5);
+        ctx.font = "14px system-ui";
+        ctx.fillText("Click or press Space to restart", W / 2, H / 2 + 30);
+    }
+
+    // UPDATE
+
+    function update(dt) {
+        if (gameOver) return;
+
+        // Power-up timers
+        if (freezeTimeLeft > 0) {
+            freezeTimeLeft -= dt;
+            if (freezeTimeLeft < 0) freezeTimeLeft = 0;
+        }
+        if (rapidTimeLeft > 0) {
+            rapidTimeLeft -= dt;
+            if (rapidTimeLeft < 0) rapidTimeLeft = 0;
+        }
+
+        freezeEl.textContent = freezeTimeLeft > 0 ? (freezeTimeLeft / 1000).toFixed(1) + "s" : "–";
+        rapidEl.textContent  = rapidTimeLeft  > 0 ? (rapidTimeLeft  / 1000).toFixed(1) + "s" : "–";
+
+        // Difficulty scaling – slower ramp & capped
+        const difficultyFactorRaw = 1 + score / 600;    // was /250
+        const difficultyFactor = Math.min(difficultyFactorRaw, 2.5);
+        speedMultiplier = difficultyFactor;
+
+        if (freezeTimeLeft > 0) {
+            speedMultiplier *= 0.25;
+        }
+
+        spawnInterval = 1400 / difficultyFactor;        // fewer zombies overall
+        speedEl.textContent = difficultyFactor.toFixed(1) + "x";
+
+        // Score grows a bit slower now
+        score += dt * 0.008 * difficultyFactor;
+        scoreEl.textContent = Math.floor(score);
+
+        // Spawn zombies
+        spawnTimer += dt;
+        if (spawnTimer >= spawnInterval) {
+            spawnTimer = 0;
+            spawnZombie(false);
+        }
+
+        // Move zombies
+        zombies.forEach(z => {
+            z.y += z.speed * speedMultiplier * dt / 1000;
+        });
+
+        // Move power-ups
+        powerUps.forEach(p => {
+            p.y += p.vy * dt / 1000;
+        });
+
+        // Cleanup power-ups off screen
+        powerUps = powerUps.filter(p => p.y < H + 40);
+
+        // Loss if any zombie hits bottom (a bit more forgiving)
+        for (const z of zombies) {
+            if (z.y > H - z.size * 0.15) {
+                endGame();
+                return;
+            }
+        }
+
+        // Remove zombies that wander far off
+        zombies = zombies.filter(z => z.y < H + 100);
+    }
+
+    // COLLISION + CLICK HANDLING
+
+    function handleClick(x, y) {
+        if (gameOver) {
+            restart();
+            return;
+        }
+
+        // Power-ups first
+        for (let i = powerUps.length - 1; i >= 0; i--) {
+            const p = powerUps[i];
+            const dx = x - p.x;
+            const dy = y - p.y;
+            if (Math.hypot(dx, dy) <= p.radius) {
+                applyPowerUp(p.type);
+                powerUps.splice(i, 1);
+                playBeep("power");
+                return;
+            }
+        }
+
+        // Zombies
+        let hitSomething = false;
+
+        for (let i = zombies.length - 1; i >= 0; i--) {
+            const z = zombies[i];
+            const half = z.size / 2;
+
+            if (x >= z.x - half && x <= z.x + half &&
+                y >= z.y - half && y <= z.y + half) {
+
+                const headTop    = z.y - half;
+                const headBottom = headTop + z.size * 0.35;
+                const isHeadshot = y >= headTop && y <= headBottom;
+
+                const damage      = rapidTimeLeft > 0 ? (isHeadshot ? 3 : 2) : 1;
+                const basePoints  = z.boss ? 6 : 1;
+                const headBonus   = isHeadshot ? (z.boss ? 8 : 2) : 0;
+
+                z.hp -= damage;
+
+                if (z.hp <= 0) {
+                    zombies.splice(i, 1);
+                    kills++;
+                    killsSinceBoss++;
+                    killsEl.textContent = kills;
+
+                    let points = basePoints + headBonus;
+                    score += points;
+                    scoreEl.textContent = Math.floor(score);
+
+                    // Higher power-up chance but still safe
+                    let dropChance = z.boss ? 0.85 : 0.22;
+                    if (Math.random() < dropChance) {
+                        const type = Math.random() < 0.5 ? "freeze" : "rapid";
+                        spawnPowerUp(z.x, z.y, type);
+                    }
+
+                    // Boss every 20 kills
+                    if (killsSinceBoss >= 20) {
+                        killsSinceBoss = 0;
+                        setTimeout(() => spawnZombie(true), 300);
+                    }
+
+                    playBeep(isHeadshot ? "head" : "hit");
+                } else {
+                    playBeep("hit");
+                }
+
+                hitSomething = true;
+                break;
+            }
+        }
+
+        if (!hitSomething) {
+            playBeep("shoot");
+        }
+    }
+
+    function applyPowerUp(type) {
+        if (type === "freeze") {
+            freezeTimeLeft = FREEZE_DURATION;
+        } else if (type === "rapid") {
+            rapidTimeLeft = RAPID_DURATION;
+        }
+    }
+
+    // GAME OVER / RESTART
+
+    function endGame() {
+        if (gameOver) return;
+        gameOver = true;
+        playBeep("over");
+
+        const finalScore = Math.floor(score);
+        if (finalScore > best) {
+            best = finalScore;
+            bestEl.textContent = best;
+            localStorage.setItem("bestZombieShooterPlusChill", best);
+        }
+    }
+
+    function restart() {
+        zombies = [];
+        powerUps = [];
+        score = 0;
+        kills = 0;
+        killsSinceBoss = 0;
+        spawnInterval = 1300;
+        speedMultiplier = 1;
+        freezeTimeLeft = 0;
+        rapidTimeLeft  = 0;
+        gameOver = false;
+        scoreEl.textContent = "0";
+        killsEl.textContent = "0";
+    }
+
+    // INPUT
+
+    canvas.addEventListener("click", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        handleClick(x, y);
+    });
+
+    canvas.addEventListener("touchstart", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const t = e.touches[0];
+        const x = t.clientX - rect.left;
+        const y = t.clientY - rect.top;
+        handleClick(x, y);
+    }, { passive: true });
+
+    window.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+            e.preventDefault();
+            if (gameOver) {
+                restart();
+            }
+        }
+    });
+
+    // MAIN LOOP
+
+    let lastTime = 0;
+    function loop(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const dt = timestamp - lastTime;
+        lastTime = timestamp;
+
+        drawBackground(dt);
+        update(dt);
+
+        zombies.forEach(drawZombie);
+        powerUps.forEach(drawPowerUp);
+        drawOverlay();
+
+        requestAnimationFrame(loop);
+    }
 
     requestAnimationFrame(loop);
-  }
-
-  requestAnimationFrame(loop);
 })();
 </script>
 </body>

@@ -160,7 +160,7 @@
       let collectibles = []; // coins & powerups
       let lastSpawnCar = 0;
       let lastSpawnCollectible = 0;
-      let spawnCarInterval = 1100;
+      let spawnCarInterval = 1600;
       let spawnCollectibleInterval = 1400;
       let roadOffset = 0;
 
@@ -171,7 +171,7 @@
       const BEST_KEY = "carCrashRunnerPlusBest";
 
       // Difficulty
-      let baseSpeed = 200;
+      let baseSpeed = 140;
       let difficultyMultiplier = 1;
 
       // Power-ups
@@ -241,9 +241,9 @@
         obstacles = [];
         collectibles = [];
         score = 0;
-        baseSpeed = 200;
+        baseSpeed = 140;
         difficultyMultiplier = 1;
-        spawnCarInterval = 1100;
+        spawnCarInterval = 1600;
         spawnCollectibleInterval = 1400;
         car.x = W / 2;
         running = true;
@@ -259,19 +259,61 @@
         slowEl.textContent = "–";
       }
 
+      // ----- SPAWN HELPERS TO PREVENT WALLS -----
+
+      function canSpawnInLane(laneIndex) {
+        const carHeight = 80;
+        const newY = -carHeight;
+        let maxY = null;
+
+        for (const o of obstacles) {
+          if (o.lane === laneIndex) {
+            if (maxY === null || o.y > maxY) {
+              maxY = o.y;
+            }
+          }
+        }
+
+        if (maxY === null) return true;
+
+        // Minimum vertical gap between cars in the same lane
+        const minGap = 170; // pixels
+        return (maxY - newY) > minGap;
+      }
+
       function spawnObstacle() {
+        // Avoid overfilling: at most laneCount * 3 cars at once
+        if (obstacles.length >= road.laneCount * 3) return;
+
         const laneWidth = (road.right - road.left) / road.laneCount;
-        const laneIndex = Math.floor(Math.random() * road.laneCount);
         const carWidth = 40;
         const carHeight = 80;
-        const x = road.left + laneWidth * laneIndex + laneWidth / 2;
+
+        let chosenLane = null;
+        const maxTries = road.laneCount * 2;
+
+        for (let t = 0; t < maxTries; t++) {
+          const laneIndex = Math.floor(Math.random() * road.laneCount);
+          if (canSpawnInLane(laneIndex)) {
+            chosenLane = laneIndex;
+            break;
+          }
+        }
+
+        if (chosenLane === null) {
+          // no safe lane right now – skip this spawn tick
+          return;
+        }
+
+        const x = road.left + (laneWidth * chosenLane) + laneWidth / 2;
 
         obstacles.push({
           x,
           y: -carHeight,
           width: carWidth,
           height: carHeight,
-          color: "#f97373"
+          color: "#f97373",
+          lane: chosenLane
         });
       }
 
@@ -292,7 +334,7 @@
           y: -20,
           radius: 14,
           type,
-          vy: 180
+          vy: 160
         });
       }
 
@@ -361,7 +403,6 @@
         ctx.fillStyle = isPlayer ? "#bbf7d0" : "#fecaca";
         ctx.fillRect(-obj.width / 2 + 6, -obj.height / 2 + 10, obj.width - 12, 20);
 
-        // highlight
         if (isPlayer && shieldActive) {
           ctx.strokeStyle = "rgba(96,165,250,0.9)";
           ctx.lineWidth = 3;
@@ -437,11 +478,9 @@
 
       function handleCrash() {
         if (shieldActive) {
-          // Shield absorbs crash
           shieldActive = false;
           shieldEl.textContent = "–";
           playBeep("power");
-          // Clear nearest obstacle
           if (obstacles.length > 0) {
             obstacles.shift();
           }
@@ -472,25 +511,27 @@
         slowEl.textContent = slowTimeLeft > 0 ? (slowTimeLeft/1000).toFixed(1) + "s" : "–";
         shieldEl.textContent = shieldActive ? "Ready" : "–";
 
-        // Difficulty scaling by score
-        const diffBase = 1 + score / 250;
+        // Difficulty scaling (gentler)
+        const diffRaw = 1 + score / 600;    // slower ramp
+        const diffBase = Math.min(diffRaw, 2.2); // cap max difficulty
         difficultyMultiplier = diffBase;
         speedEl.textContent = diffBase.toFixed(1) + "x";
 
         const effectiveSpeedFactor = diffBase * (slowTimeLeft > 0 ? 0.35 : 1);
 
-        baseSpeed = 200 * effectiveSpeedFactor;
-        spawnCarInterval = 1100 / diffBase;
-        spawnCollectibleInterval = 1400 / diffBase;
+        baseSpeed = 140 * effectiveSpeedFactor;
 
-        // Increase score over time
+        // Cap how often cars can spawn so it's never a wall
+        spawnCarInterval = Math.max(1000, 1600 / diffBase);
+        // Collectibles a bit more frequent, but also capped
+        spawnCollectibleInterval = Math.max(900, 1400 / diffBase);
+
+        // Score over time
         score += dt * 0.012 * diffBase;
         scoreEl.textContent = Math.floor(score);
 
-        // Move road & call drawRoad in main loop
-
         // Move obstacles
-        const obstacleSpeed = baseSpeed * 0.9;
+        const obstacleSpeed = baseSpeed * 0.85;
         for (const o of obstacles) {
           o.y += obstacleSpeed * dt * 0.001;
         }
@@ -504,7 +545,7 @@
         obstacles = obstacles.filter(o => o.y < H + 120);
         collectibles = collectibles.filter(c => c.y < H + 40);
 
-        // Spawn new traffic
+        // Spawn traffic
         lastSpawnCar += dt;
         if (lastSpawnCar >= spawnCarInterval) {
           spawnObstacle();
@@ -518,7 +559,7 @@
           lastSpawnCollectible = 0;
         }
 
-        // Collision with obstacles
+        // Collisions with cars
         for (const o of obstacles) {
           if (rectsOverlap(car, o)) {
             handleCrash();
@@ -526,14 +567,13 @@
           }
         }
 
-        // Collision with collectibles
+        // Collisions with collectibles
         for (let i = collectibles.length - 1; i >= 0; i--) {
           const c = collectibles[i];
           const dx = car.x - c.x;
           const dy = car.y - c.y;
           const dist = Math.hypot(dx, dy);
           if (dist < c.radius + Math.min(car.width, car.height)/3) {
-            // pickup
             if (c.type === "coin") {
               score += 10;
               playBeep("coin");
@@ -548,7 +588,7 @@
           }
         }
 
-        // If car somehow leaves road, clamp it
+        // Clamp car to road
         const minX = road.left + car.width / 2;
         const maxX = road.right - car.width / 2;
         if (car.x < minX) car.x = minX;
@@ -557,22 +597,21 @@
 
       function draw() {
         // background + road
-        drawRoad(16); // dt-ish for visual; actual scroll uses update
+        drawRoad(16); // visual
 
-        // draw collectibles
+        // collectibles
         for (const c of collectibles) {
           drawCollectible(c);
         }
 
-        // draw obstacles
+        // cars
         for (const o of obstacles) {
           drawCar(o, false);
         }
 
-        // draw player
+        // player
         drawCar(car, true);
 
-        // overlay if crashed
         drawCrashOverlay();
       }
 
