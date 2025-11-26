@@ -1,0 +1,60 @@
+/* Page fade-in */
+body {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+body.page-loaded {
+  opacity: 1;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+.carousel-inner {
+    border-radius: 5px;
+}
+
+.cart {
+  font-size: 24px;
+  margin-right: 2px;
+  margin-left: 10px;
+}
+
+i {
+  font-size: 16px;
+}
+
+body a {
+  text-decoration: none;
+}
+
+.toast {
+  z-index: 1080;
+}
+
+#searchBtn {
+  border-radius: 0px 10px 10px 0px;
+  margin-left: -7.5px;
+}
+
+#searchInput {
+  border-radius: 10px 0px 0px 10px;
+}
+
+.text-shadow {
+  text-shadow: 0 0 8px rgba(0,0,0,0.65);
+}
+
+.item-img {
+  transition: 0.3s ease;
+}
+
+.item-img:hover {
+  filter: blur(2.5px);
+}
+

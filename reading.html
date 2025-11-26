@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>$2 Mini Reading</title>
+
+  <link href="style.css" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Bootstrap Icons (for cart icon) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+  <!-- Load your main app (Firebase init, etc.) -->
+  <script type="module" src="app.js"></script>
+</head>
+
+<body>
+  <!-- NAVBAR (matches your store style) -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Store Name</a>
+
+      <form class="searchBar d-flex mt-3" role="search" action="search.html" method="GET">
+        <input id="searchInput" name="q" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+        <button title="Search" class="btn btn-outline-success" type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+      </form>
+
+      <a title="Cart" href="cart.html" type="button">
+        <i class="cart bi bi-cart4 position-relative"></i>
+        <span id="cartBadge" class="top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="container mb-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-9">
+
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title mb-2 text-center">$2 Mini Reading</h2>
+            <p class="text-muted text-center mb-4">
+              A short, intuitive mini reading that appears right on this page after you submit.
+            </p>
+
+            <!-- STEP 1: Payment -->
+            <div class="mb-4">
+              <h5 class="mb-2">Step 1 — Pay $2 for your reading</h5>
+              <p class="text-muted small mb-2">
+                Click the button below to pay for your reading. After you’ve paid, come back to this page and complete the form.
+              </p>
+
+              <!-- TODO: Replace this link with your real Stripe / PayPal payment link -->
+              <a
+                href="https://example.com/your-payment-link"
+                target="_blank"
+                rel="noopener"
+                class="btn btn-success w-100 mb-2"
+              >
+                Pay $2 for Reading
+              </a>
+
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" value="" id="paidCheckbox">
+                <label class="form-check-label" for="paidCheckbox">
+                  I have completed my $2 payment.
+                </label>
+              </div>
+            </div>
+
+            <hr>
+
+            <!-- STEP 2: Info Form -->
+            <h5 class="mb-3">Step 2 — Tell me about your reading</h5>
+
+            <form id="readingForm" novalidate>
+              <div class="mb-3">
+                <label for="nameInput" class="form-label">Your Name</label>
+                <input type="text" class="form-control" id="nameInput" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="emailInput" class="form-label">Your Email (optional, for your records)</label>
+                <input type="email" class="form-control" id="emailInput">
+              </div>
+
+              <div class="mb-3">
+                <label for="topicInput" class="form-label">What would you like the reading to focus on?</label>
+                <textarea class="form-control" id="topicInput" rows="4" required
+                  placeholder="Example: Love, career crossroads, healing past trauma, next steps on my path..."></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label for="extraInput" class="form-label">Anything else you’d like to share? (optional)</label>
+                <textarea class="form-control" id="extraInput" rows="3"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">
+                Receive My Reading
+              </button>
+            </form>
+
+            <!-- Success / error messages -->
+            <div id="readingMessage" class="mt-3 small"></div>
+
+            <!-- GENERATED READING OUTPUT -->
+            <div id="readingResult" class="mt-4" style="display:none;">
+              <h5>Your Mini Reading</h5>
+              <div class="border rounded p-3 mt-2" style="white-space: pre-wrap;" id="readingText"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- JS: Save reading + show result on page -->
+  <script type="module">
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  const db = getFirestore();
+
+  const form = document.getElementById("readingForm");
+  const msgEl = document.getElementById("readingMessage");
+  const paidCheckbox = document.getElementById("paidCheckbox");
+  const readingResult = document.getElementById("readingResult");
+  const readingTextEl = document.getElementById("readingText");
+
+  // ===== RANDOM READING POOL =====
+  const intros = [
+    (name, topic) =>
+      `Dear ${name},\n\nAs I tune into the energy around ${topic}, I feel a quiet shift, like the moment just before dawn when the sky hasn’t decided if it’s still night or already morning.`,
+    (name, topic) =>
+      `Dear ${name},\n\nThe moment I connect with your energy around ${topic}, I sense a soul who’s much stronger than they realize, someone who has walked through shadows and is still willing to reach for the light.`,
+    (name, topic) =>
+      `Dear ${name},\n\nThere’s a softness and a stubbornness in you at the same time around ${topic}—soft enough to feel deeply, stubborn enough to keep going even when it hurts.`,
+    (name, topic) =>
+      `Dear ${name},\n\nYour energy around ${topic} feels like standing at the edge of a river that’s rising: you know something is about to change, and part of you is both afraid of it and relieved by it.`,
+    (name, topic) =>
+      `Dear ${name},\n\nWhen I focus on ${topic}, I’m shown a door that’s been closed for a long time. The handle is worn from how often you’ve thought about opening it, even if you haven’t turned it yet.`,
+    (name, topic) =>
+      `Dear ${name},\n\nThe energy around ${topic} carries the weight of old stories, but beneath that weight is a bright, stubborn ember that hasn’t gone out, no matter how much life has tried to smother it.`,
+    (name, topic) =>
+      `Dear ${name},\n\nAs I sit with your question about ${topic}, I feel a quiet, steady drumbeat in your spirit—proof that even when you feel frozen, something inside you is still moving forward.`,
+    (name, topic) =>
+      `Dear ${name},\n\nThere is a crossroads energy around ${topic}: one path shaped by fear and old survival patterns, and another shaped by the person you are slowly becoming, not the person you had to be.`
+  ];
+
+  const middles = [
+    () =>
+      `You’ve carried far more than most people will ever see. The memories, triggers, and gut reactions aren’t proof that you’re broken—they are proof that you adapted to survive things that were never your fault.`,
+    () =>
+      `Your nervous system has been on guard for a long time, and it has learned to scan for danger even in safe places. This doesn’t mean you’re doomed to live this way forever, only that your body needs time, patience, and gentleness to relearn what safety feels like.`,
+    () =>
+      `There is a recurring pattern here: you put yourself last until your spirit finally whispers, “No more.” When you ignore that whisper, your body starts speaking louder through exhaustion, anxiety, or shutdown.`,
+    () =>
+      `I’m shown an image of you standing in a room full of other people’s expectations, trying to breathe in air that doesn’t belong to you. This is not a failure on your part—it’s simply time to step closer to the window and let in your own truth.`,
+    () =>
+      `You are not behind. You are not late. You are not missing some secret handbook everyone else got. You are simply healing in real time, and healing has never once followed a straight line.`,
+    () =>
+      `Your guides are gentle but firm: they are asking you to stop treating your hurt self like an inconvenience. The parts of you that panic, freeze, or doubt are not the enemy—they are younger versions of you who still believe they’re alone.`,
+    () =>
+      `I feel a deep weariness, like you’ve had to be the strong one for far too long. The message here is that strength doesn’t always look like holding everything together; sometimes it looks like finally letting something fall that was never yours to carry.`,
+    () =>
+      `There is a quiet invitation here: to move from surviving to allowing. You don’t have to fix everything at once. You are allowed to take one small step toward what brings you peace, even if it makes no sense to anyone else.`
+  ];
+
+  const closings = [
+    () =>
+      `Over the next few days, notice what keeps tugging at your attention—songs, phrases, memories, or sudden waves of emotion. These are not random; they are signposts pointing you toward what wants to be healed next.`,
+    () =>
+      `You are being asked to trust the smallest of shifts: one honest conversation, one boundary, one moment of saying “no” when you’d usually say “it’s fine.” These tiny choices are how you rewrite the story.`,
+    () =>
+      `You don’t have to know the entire path from here. You only need to honor the next clear nudge—rest when you’re tired, cry when you need to, reach out when you feel yourself slipping back into old patterns.`,
+    () =>
+      `Your heart is wiser than you’ve been taught to believe. When something in you quietly says “this isn’t right for me,” that is a sacred message, not a flaw to be argued away.`,
+    () =>
+      `The energy around you is shifting, even if you can’t see the full picture yet. Trust that every time you choose truth over pretending, you move closer to a life that actually fits your soul.`,
+    () =>
+      `Your spirit team wants you to remember: you were never meant to heal alone. Let in the people, practices, and moments that help you breathe easier. You deserve that softness, even if no one ever modeled it for you.`,
+    () =>
+      `You are allowed to grieve what you didn’t get and still be excited for what’s coming. Both can exist at the same time, and honoring both is part of your healing.`,
+    () =>
+      `For now, be gentle with yourself. Healing isn’t about becoming a version of you that never hurts again—it’s about becoming a version of you who knows they are worthy even when they do.`
+  ];
+
+  function generateReading(name, topic, extra) {
+    const safeName = name && name.trim() ? name.trim() : "Seeker";
+    const safeTopic = topic && topic.trim() ? topic.trim() : "your current path";
+
+    const introFn = intros[Math.floor(Math.random() * intros.length)];
+    const middleFn = middles[Math.floor(Math.random() * middles.length)];
+    const closingFn = closings[Math.floor(Math.random() * closings.length)];
+
+    let text = introFn(safeName, safeTopic) + "\n\n" + middleFn() + "\n\n";
+
+    if (extra && extra.trim()) {
+      text +=
+        `There’s something important in what you shared: "${extra.trim()}". ` +
+        `This doesn’t define you, but it does explain why some parts of you react so strongly. ` +
+        `You’re being encouraged not to rush past this, but to meet it with compassion instead of shame.\n\n`;
+    }
+
+    text += closingFn() + "\n\nWith tenderness,\nYour Mini Reading\n";
+
+    return text;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msgEl.textContent = "";
+    msgEl.className = "mt-3 small";
+
+    const name = document.getElementById("nameInput").value.trim();
+    const email = document.getElementById("emailInput").value.trim();
+    const topic = document.getElementById("topicInput").value.trim();
+    const extra = document.getElementById("extraInput").value.trim();
+
+    if (!paidCheckbox.checked) {
+      msgEl.textContent = "Please confirm you have completed the $2 payment before submitting.";
+      msgEl.classList.add("text-danger");
+      return;
+    }
+
+    if (!name || !topic) {
+      msgEl.textContent = "Please fill in at least your name and the focus of your reading.";
+      msgEl.classList.add("text-danger");
+      return;
+    }
+
+    // 1) Generate a random reading from the pool
+    const readingText = generateReading(name, topic, extra);
+
+    // 2) Try to save it in Firestore (for your records)
+    try {
+      await addDoc(collection(db, "readings"), {
+        name,
+        email: email || null,
+        topic,
+        extra,
+        readingText,
+        createdAt: serverTimestamp(),
+        status: "delivered",
+        paid: true
+      });
+    } catch (err) {
+      console.error("Error saving reading:", err);
+      // Still show the reading even if save fails
+    }
+
+    // 3) Show the reading on the page
+    readingTextEl.textContent = readingText;
+    readingResult.style.display = "block";
+
+    msgEl.textContent = "Your mini reading is ready below.";
+    msgEl.classList.add("text-success");
+  });
+</script>
+
+</body>
+</html>

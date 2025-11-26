@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>New Age Products</title>
+
+  <link href="style.css" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+
+  <!-- NAVBAR (matches index.html exactly) -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
+    <div class="container">
+      
+      <a class="navbar-brand" href="index.html">Store Name</a>
+
+      <!-- Search bar -->
+      <form class="searchBar d-flex mt-3" role="search" action="search.html" method="GET">
+        <input id="searchInput" name="q" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+        <button id="searchBtn" title="Search" class="searchBtn btn btn-outline-success" type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+      </form>
+
+      <!-- Cart -->
+      <a title="Cart" href="cart.html" type="button">
+        <i class="cart bi bi-cart4 position-relative"></i>
+        <span id="cartBadge" class="top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
+      </a>
+
+    </div>
+  </nav>
+
+  <!-- ============================= -->
+  <!-- TOP BANNER ROW (matches index) -->
+  <!-- ============================= -->
+
+  <div class="container">
+    <div class="row">
+
+      <!-- Left: Chakra Water carousel -->
+      <div class="col-12 col-md-4 mb-3">
+        <div id="newAgeCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+
+            <div class="carousel-item active">
+              <div class="card">
+                <img src="chakra-water.png" class="w-100 rounded-start" alt="Chakra Water">
+              </div>
+            </div>
+
+            <div class="carousel-item">
+              <div class="card">
+                <img src="protection-candle-img.png" class="w-100 rounded-start" alt="Protection Candle">
+              </div>
+            </div>
+
+            <div class="carousel-item">
+              <div class="card">
+                <img src="amethyst-candle.png" class="w-100 rounded-start" alt="Reiki Candle">
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle: Chakra Water link -->
+      <div class="col-12 col-md-4 mb-3">
+        <div class="card">
+          <img src="chakra-water.png" class="img-fluid rounded-start" alt="Chakra Water">
+        </div>
+      </div>
+
+      <!-- Right: Candles gallery -->
+      <div class="col-12 col-md-4 mb-3">
+        <div class="card">
+          <img src="protection-candle-img.png" class="img-fluid rounded-start" alt="Candles">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================= -->
+  <!-- PRODUCT GRID (matches index) -->
+  <!-- ============================= -->
+
+  <div class="container">
+    <div class="row">
+
+      <!-- Chakra Water -->
+      <div class="col-6 col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 shadow-sm">
+
+          <a href="chakra-water.html">
+            <img src="chakra-water.png" class="item-img card-img-top" alt="Chakra Water">
+          </a>
+
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">Chakra Water</h5>
+            <p class="text-muted mb-2">Reiki infused water.</p>
+
+            <p class="fw-bold mb-1">$24.99</p>
+            <p id="stock-chakraWater" class="text-muted small mb-3"></p>
+
+            <div class="btn-group mt-auto" role="group" aria-label="Chakra Water qty" data-product-id="chakraWater">
+              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
+              <button id="qty-chakraWater" type="button" class="btn btn-outline-secondary" disabled>0</button>
+              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Protection Candle -->
+      <div class="col-6 col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 shadow-sm">
+
+          <a href="protection-candle.html">
+            <img src="protection-candle-img.png" class="item-img card-img-top" alt="Protection Candle">
+          </a>
+
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">Protection Candle</h5>
+            <p class="text-muted mb-2">Hand-poured protection spell candle.</p>
+
+            <p class="fw-bold mb-1">$12.99</p>
+            <p id="stock-protectionCandle" class="text-muted small mb-3"></p>
+
+            <div class="btn-group mt-auto" role="group" aria-label="Protection Candle qty" data-product-id="protectionCandle">
+              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
+              <button id="qty-protectionCandle" type="button" class="btn btn-outline-secondary" disabled>0</button>
+              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Amethyst Candle -->
+      <div class="col-6 col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 shadow-sm">
+
+          <a href="#">
+            <img src="amethyst-candle.png" class="card-img-top" alt="Amethyst Candle">
+          </a>
+
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">Amethyst Candle</h5>
+            <p class="text-muted mb-2">Reiki charged with amethyst chips.</p>
+
+            <p class="fw-bold mb-1">$18.99</p>
+            <p id="stock-amethystCandle" class="text-muted small mb-3"></p>
+
+            <div class="btn-group mt-auto" role="group" aria-label="Amethyst Candle qty" data-product-id="amethystCandle">
+              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
+              <button id="qty-amethystCandle" type="button" class="btn btn-outline-secondary" disabled>0</button>
+              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Rose Quartz Candle -->
+      <div class="col-6 col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 shadow-sm">
+
+          <a href="#">
+            <img src="rose-quartz-candle.png" class="card-img-top" alt="Rose Quartz Candle">
+          </a>
+
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">Rose Quartz Candle</h5>
+            <p class="text-muted mb-2">Soft love energy + rose quartz chips.</p>
+
+            <p class="fw-bold mb-1">$18.99</p>
+            <p id="stock-roseQuartzCandle" class="text-muted small mb-3"></p>
+
+            <div class="btn-group mt-auto" role="group" aria-label="Rose Quartz Candle qty" data-product-id="roseQuartzCandle">
+              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
+              <button id="qty-roseQuartzCandle" type="button" class="btn btn-outline-secondary" disabled>0</button>
+              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- THEME SYNC -->
+  <script>
+    (function () {
+      const prefersDark = window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
+    })();
+  </script>
+
+  <script src="app.js" type="module"></script>
+
+  <!-- Cart Toast -->
+  <div class="toast position-fixed bottom-0 end-0 p-3">
+    <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">Item added to cart.</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
