@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Neon Maze Chomp</title>
+<style>
+  body {
+    margin: 0;
+    background: radial-gradient(circle at top, #020617 0, #000 60%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #e5e7eb;
+  }
+
+  #wrapper {
+    padding: 1rem 1.2rem 1.3rem;
+    border-radius: 16px;
+    background: radial-gradient(circle at top, #020617 0, #020617 40%, #020617 70%, #000 100%);
+    box-shadow:
+      0 0 40px rgba(0,0,0,0.9),
+      0 0 30px rgba(56,189,248,0.25);
+    text-align: center;
+    position: relative;
+  }
+
+  #hud {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  #hud span strong {
+    font-weight: 600;
+  }
+
+  canvas {
+    display: block;
+    margin: 0 auto;
+    background: #020617;
+    border-radius: 14px;
+    border: 3px solid #0f172a;
+    box-shadow:
+      0 0 20px rgba(15,23,42,0.9),
+      0 0 16px rgba(59,130,246,0.35);
+  }
+
+  #hint {
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    opacity: 0.9;
+  }
+
+  /* subtle scanline / arcade overlay */
+  #wrapper::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0.4rem;
+    border-radius: 14px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.03),
+      rgba(255,255,255,0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+<div id="wrapper">
+  <div id="hud">
+    <span>Score: <strong id="score">0</strong></span>
+    <span>Lives: <strong id="lives">3</strong></span>
+  </div>
+  <canvas id="game" width="416" height="416"></canvas>
+  <div id="hint">
+    Use <strong>Arrow keys</strong> or <strong>WASD</strong> to move.<br>
+    Avoid neon ghosts, eat all dots. Press <strong>Space</strong> or click after Game Over to restart.
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  const scoreEl = document.getElementById("score");
+  const livesEl = document.getElementById("lives");
+
+  // ==== MAZE SETUP ====
+  // # = wall, . = pellet, o = power pellet, ' ' = empty
+  const level = [
+    "################",
+    "#..............#",
+    "#.####.####.##.#",
+    "#o#  #......#..#",
+    "#.##.#.##.#.##.#",
+    "#....#....#....#",
+    "####.####.####.#",
+    "#..............#",
+    "#.####.##.####.#",
+    "#.#  #.o.#  #..#",
+    "#.#.##.##.##.#.#",
+    "#..............#",
+    "################"
+  ];
+
+  const TILE = 32;
+  const ROWS = level.length;
+  const COLS = Math.max(...level.map(r => r.length));
+
+  canvas.width = COLS * TILE;
+  canvas.height = ROWS * TILE;
+
+  let pelletsRemaining = 0;
+  const pellets = [];
+  const powerPellets = [];
+
+  for (let y = 0; y < ROWS; y++) {
+    pellets[y] = [];
+    powerPellets[y] = [];
+    for (let x = 0; x < COLS; x++) {
+      const ch = (level[y][x] || "#");
+      if (ch === "." || ch === "o") {
+        pellets[y][x] = ch === ".";
+        powerPellets[y][x] = ch === "o";
+        pelletsRemaining++;
+      } else {
+        pellets[y][x] = false;
+        powerPellets[y][x] = false;
+      }
+    }
+  }
+
+  function isWall(tx, ty) {
+    if (ty < 0 || ty >= ROWS || tx < 0 || tx >= COLS) return true;
+    const ch = (level[ty][tx] || "#");
+    return ch === "#";
+  }
+
+  function tileFromPos(x, y) {
+    return {
+      tx: Math.floor(x / TILE),
+      ty: Math.floor(y / TILE)
+    };
+  }
+
+  // ==== PLAYER & GHOSTS ====
+  const player = {
+    x: TILE * 1.5,
+    y: TILE * 1.5,
+    radius: TILE * 0.45,
+    speed: 2.5,
+    dir: { x: 0, y: 0 },
+    nextDir: { x: 0, y: 0 },
+    mouthAngle: 0.1,
+    mouthOpenDir: 1
+  };
+
+  const ghosts = [
+    { x: TILE * (COLS - 2.5), y: TILE * 1.5,          color: "#f97373", speed: 2.0, dir: {x: -1, y: 0}, frightened: 0 },
+    { x: TILE * (COLS - 2.5), y: TILE * (ROWS - 2.5), color: "#38bdf8", speed: 1.9, dir: {x: -1, y: 0}, frightened: 0 },
+    { x: TILE * 1.5,          y: TILE * (ROWS - 2.5), color: "#a855f7", speed: 1.8, dir: {x:  1, y: 0}, frightened: 0 }
+  ];
+
+  let score = 0;
+  let lives = 3;
+  let poweredUp = 0; // ms
+  let gameOver = false;
+  let win = false;
+
+  // ==== INPUT ====
+  window.addEventListener("keydown", (e) => {
+    const key = e.key.toLowerCase();
+
+    if (e.code === "Space") {
+      if (gameOver) restartGame();
+      e.preventDefault();
+    }
+
+    if (key === "arrowup"   || key === "w") setNextDir(0, -1);
+    if (key === "arrowdown" || key === "s") setNextDir(0,  1);
+    if (key === "arrowleft" || key === "a") setNextDir(-1, 0);
+    if (key === "arrowright"|| key === "d") setNextDir(1,  0);
+  });
+
+  canvas.addEventListener("click", () => {
+    if (gameOver) restartGame();
+  });
+
+  function setNextDir(dx, dy) {
+    player.nextDir.x = dx;
+    player.nextDir.y = dy;
+  }
+
+  // movement check: sample the tile ahead
+  function canMove(x, y, dx, dy) {
+    const nx = x + dx * player.speed;
+    const ny = y + dy * player.speed;
+    const tx = Math.floor(nx / TILE);
+    const ty = Math.floor(ny / TILE);
+    return !isWall(tx, ty);
+  }
+
+  // ==== GAME LOGIC ====
+  function resetPellets() {
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const ch = (level[y][x] || "#");
+        pellets[y][x]      = (ch === ".");
+        powerPellets[y][x] = (ch === "o");
+      }
+    }
+    pelletsRemaining = 0;
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        if (pellets[y][x] || powerPellets[y][x]) pelletsRemaining++;
+      }
+    }
+  }
+
+  function resetPositions() {
+    player.x = TILE * 1.5;
+    player.y = TILE * 1.5;
+    player.dir = { x: 0, y: 0 };
+    player.nextDir = { x: 0, y: 0 };
+    poweredUp = 0;
+
+    ghosts[0].x = TILE * (COLS - 2.5); ghosts[0].y = TILE * 1.5;          ghosts[0].dir = {x: -1, y: 0};
+    ghosts[1].x = TILE * (COLS - 2.5); ghosts[1].y = TILE * (ROWS - 2.5);  ghosts[1].dir = {x: -1, y: 0};
+    ghosts[2].x = TILE * 1.5;          ghosts[2].y = TILE * (ROWS - 2.5);  ghosts[2].dir = {x:  1, y: 0};
+    ghosts.forEach(g => g.frightened = 0);
+  }
+
+  function restartGame() {
+    resetPellets();
+    score = 0;
+    lives = 3;
+    gameOver = false;
+    win = false;
+    resetPositions();
+    updateHUD();
+  }
+
+  function loseLife() {
+    lives--;
+    updateHUD();
+    if (lives <= 0) {
+      gameOver = true;
+      win = false;
+      return;
+    }
+    resetPositions();
+  }
+
+  function updateHUD() {
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+  }
+
+  function updatePlayer() {
+    // try to turn into nextDir
+    if (player.nextDir.x !== player.dir.x || player.nextDir.y !== player.dir.y) {
+      if (canMove(player.x, player.y, player.nextDir.x, player.nextDir.y)) {
+        player.dir.x = player.nextDir.x;
+        player.dir.y = player.nextDir.y;
+      }
+    }
+
+    if (canMove(player.x, player.y, player.dir.x, player.dir.y)) {
+      player.x += player.dir.x * player.speed;
+      player.y += player.dir.y * player.speed;
+    }
+
+    // wrap horizontally
+    if (player.x < 0) player.x = canvas.width - TILE / 2;
+    if (player.x > canvas.width) player.x = TILE / 2;
+
+    // pellets
+    const { tx, ty } = tileFromPos(player.x, player.y);
+    if (!isWall(tx, ty)) {
+      if (pellets[ty][tx]) {
+        pellets[ty][tx] = false;
+        pelletsRemaining--;
+        score += 10;
+        updateHUD();
+      }
+      if (powerPellets[ty][tx]) {
+        powerPellets[ty][tx] = false;
+        pelletsRemaining--;
+        score += 50;
+        poweredUp = 7000; // ms
+        ghosts.forEach(g => g.frightened = 7000);
+        updateHUD();
+      }
+    }
+
+    if (pelletsRemaining <= 0 && !gameOver) {
+      gameOver = true;
+      win = true;
+    }
+
+    // mouth animation
+    player.mouthAngle += 0.15 * player.mouthOpenDir;
+    if (player.mouthAngle > 0.45) player.mouthOpenDir = -1;
+    if (player.mouthAngle < 0.05) player.mouthOpenDir = 1;
+  }
+
+  function updateGhosts(dt) {
+    if (poweredUp > 0) {
+      poweredUp -= dt;
+      if (poweredUp < 0) poweredUp = 0;
+    }
+
+    for (const g of ghosts) {
+      if (g.frightened > 0) {
+        g.frightened -= dt;
+        if (g.frightened < 0) g.frightened = 0;
+      }
+
+      const speed = g.speed;
+      const gx = g.x;
+      const gy = g.y;
+
+      const cx = gx / TILE;
+      const cy = gy / TILE;
+      const atCenter = Math.abs(cx - Math.round(cx)) < 0.15 &&
+                       Math.abs(cy - Math.round(cy)) < 0.15;
+
+      if (atCenter) {
+        const tx = Math.round(cx);
+        const ty = Math.round(cy);
+
+        const allDirs = [
+          {x: 1,  y: 0},
+          {x: -1, y: 0},
+          {x: 0,  y: 1},
+          {x: 0,  y: -1}
+        ];
+
+        let nonBack = [];
+        let backOption = null;
+
+        for (const d of allDirs) {
+          const ntx = tx + d.x;
+          const nty = ty + d.y;
+          if (isWall(ntx, nty)) continue;
+
+          if (d.x === -g.dir.x && d.y === -g.dir.y) {
+            backOption = d;
+          } else {
+            nonBack.push(d);
+          }
+        }
+
+        // if dead-end, allow turning back so they don't get stuck
+        let candidates = nonBack.length > 0 ? nonBack : (backOption ? [backOption] : []);
+
+        if (candidates.length > 0) {
+          let chosen = candidates[0];
+
+          // decide target
+          const targetX = player.x;
+          const targetY = player.y;
+
+          if (g.frightened > 0 || poweredUp > 0) {
+            // run away: choose farthest
+            let maxDist = -Infinity;
+            for (const d of candidates) {
+              const px = (tx + d.x) * TILE;
+              const py = (ty + d.y) * TILE;
+              const dist = (px - targetX) ** 2 + (py - targetY) ** 2;
+              if (dist > maxDist) {
+                maxDist = dist;
+                chosen = d;
+              }
+            }
+          } else {
+            // chase: choose closest
+            let minDist = Infinity;
+            for (const d of candidates) {
+              const px = (tx + d.x) * TILE;
+              const py = (ty + d.y) * TILE;
+              const dist = (px - targetX) ** 2 + (py - targetY) ** 2;
+              if (dist < minDist) {
+                minDist = dist;
+                chosen = d;
+              }
+            }
+          }
+
+          g.dir = chosen;
+          // snap to tile center to keep movement clean
+          g.x = tx * TILE;
+          g.y = ty * TILE;
+        }
+      }
+
+      // move ghost
+      const nx = g.x + g.dir.x * speed;
+      const ny = g.y + g.dir.y * speed;
+      const { tx, ty } = tileFromPos(nx, ny);
+      if (!isWall(tx, ty)) {
+        g.x = nx;
+        g.y = ny;
+      }
+
+      // wrap horizontally
+      if (g.x < 0) g.x = canvas.width - TILE / 2;
+      if (g.x > canvas.width) g.x = TILE / 2;
+
+      // collision with player
+      const dx = g.x - player.x;
+      const dy = g.y - player.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < player.radius * 0.9) {
+        if ((g.frightened > 0 || poweredUp > 0) && !gameOver) {
+          // eat ghost
+          score += 200;
+          g.x = TILE * (COLS - 2.5);
+          g.y = TILE * 1.5;
+          g.frightened = 0;
+          updateHUD();
+        } else if (!gameOver && poweredUp <= 0) {
+          loseLife();
+        }
+      }
+    }
+  }
+
+  // ==== DRAWING ====
+  function drawMaze() {
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const ch = (level[y][x] || "#");
+        if (ch === "#") {
+          // Neon wall block
+          ctx.fillStyle = "#020617";
+          ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+
+          ctx.strokeStyle = "#38bdf8";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x * TILE + 4, y * TILE + 4, TILE - 8, TILE - 8);
+
+          ctx.strokeStyle = "rgba(56,189,248,0.35)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x * TILE + 2, y * TILE + 2, TILE - 4, TILE - 4);
+        }
+        if (pellets[y][x]) {
+          ctx.fillStyle = "#f9fafb";
+          ctx.beginPath();
+          ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        if (powerPellets[y][x]) {
+          ctx.fillStyle = "#facc15";
+          ctx.beginPath();
+          ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowColor = "rgba(250,204,21,0.8)";
+          ctx.shadowBlur = 12;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+    }
+  }
+
+  function drawPlayer() {
+    const angle = player.mouthAngle;
+    let start = 0;
+    if (player.dir.x === 1) start = angle;
+    else if (player.dir.x === -1) start = Math.PI - angle;
+    else if (player.dir.y === -1) start = -Math.PI/2 - angle;
+    else if (player.dir.y === 1) start = Math.PI/2 - angle;
+    else start = 0;
+
+    const end = start + Math.PI * 2 - angle * 2;
+
+    ctx.fillStyle = "#facc15";
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y);
+    ctx.arc(player.x, player.y, player.radius, start, end);
+    ctx.closePath();
+    ctx.fill();
+
+    // slight glow
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.radius + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(234,179,8,0.7)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawGhost(g) {
+    const r = TILE * 0.45;
+    ctx.save();
+    ctx.translate(g.x, g.y);
+
+    const bodyColor = g.frightened > 0 || poweredUp > 0 ? "#22c55e" : g.color;
+
+    // body
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, Math.PI, 0);
+    ctx.lineTo(r, r);
+    ctx.lineTo(-r, r);
+    ctx.closePath();
+    ctx.fill();
+
+    // subtle glow
+    ctx.globalAlpha = 0.65;
+    ctx.strokeStyle = bodyColor;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-r, -r, r * 2, r * 2);
+    ctx.globalAlpha = 1;
+
+    // eyes
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(-r * 0.4, -r * 0.2, r * 0.25, 0, Math.PI * 2);
+    ctx.arc(r * 0.1, -r * 0.2, r * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#0f172a";
+    ctx.beginPath();
+    ctx.arc(-r * 0.4, -r * 0.2, r * 0.1, 0, Math.PI * 2);
+    ctx.arc(r * 0.1, -r * 0.2, r * 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawOverlay() {
+    if (!gameOver) return;
+
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#f9fafb";
+    ctx.textAlign = "center";
+
+    ctx.font = "bold 32px system-ui";
+    ctx.fillText(win ? "YOU WIN!" : "GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
+
+    ctx.font = "18px system-ui";
+    ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2 + 18);
+    ctx.font = "14px system-ui";
+    ctx.fillText("Click or press SPACE to restart", canvas.width / 2, canvas.height / 2 + 42);
+  }
+
+  // ==== MAIN LOOP ====
+  let lastTime = 0;
+  function loop(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    const dt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    if (!gameOver) {
+      updatePlayer();
+      updateGhosts(dt);
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawMaze();
+    ghosts.forEach(drawGhost);
+    drawPlayer();
+    drawOverlay();
+
+    requestAnimationFrame(loop);
+  }
+
+  restartGame();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
