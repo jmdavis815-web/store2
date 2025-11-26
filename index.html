@@ -14,12 +14,10 @@
 <body>
 
     <!-- NavBar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
   <div class="container-fluid">
 
     <a title="Home" href="index.html"><i class="navBtn bi bi-house-door-fill"></i></a>
-
-    <a title="Arcade" href="arcade.html" type="button"><i class="navBtn bi bi-dpad"></i></a>
     
     <a class="navbar-brand" href="index.html">Store Name</a>
 
@@ -32,6 +30,19 @@
     </div>
     </div>
     </nav>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link" href="arcade.html">Arcade</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="art.html">Art</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="new-age.html">New Age</a>
+      </li>
+    </ul>
 
     <!-- Main Content -->
     <div class="container">
@@ -78,12 +89,12 @@
       </div>
     </div>
 
-    <!-- Right column: Winter sale banner -->
+    <!-- Banner -->
     <div class="col-12 col-md-4 mb-3">
       <div class="card">
         <div class="row g-0">
           <div class="col-12">
-            <img src="winter-sale-25.png" class="img-fluid rounded-start" alt="Winter Sale 25%">
+            <a href="new-age.html"><img src="new-age.png" class="item-img img-fluid rounded-start" alt="Arcade"></a>
           </div>
         </div>
       </div>
@@ -175,44 +186,25 @@
                     </div>
               </div>
 
-              <!-- Arcade Carousel -->
-            <div class="col-12 col-md-3 mb-3">
-              <div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-          
-                  <div class="carousel-item active">
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-12">
-                          <a href="car-game.html"><img class="game-img" src="car-game.png" alt="Car Game"></a>
-                        </div>
-                      </div>
+              <div class="col-12 col-md-4 mb-3">
+                <div class="card">
+                  <div class="row g-0">
+                    <div class="col-12">
+                      <img src="winter-sale-25.png" class="item-img img-fluid rounded-start" alt="Winter Sale 25%">
                     </div>
                   </div>
-
-                  <div class="carousel-item">
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-12">
-                          <a href="zombie-game.html"><img class="game-img" src="zombie-game.png" alt="Car Game"></a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="carousel-item">
-                    <div class="card">
-                      <div class="row g-0">
-                        <div class="col-12">
-                          <a href="last-credit-game.html"><img class="game-img" src="last-credit.png" alt="Horror Game"></a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
               </div>
-            </div>
+
+              <div class="col-12 col-md-4 mb-3">
+                <div class="card">
+                  <div class="row g-0">
+                    <div class="col-12">
+                      <a href="arcade.html"><img src="arcade.png" class="item-img img-fluid rounded-start" alt="Arcade"></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
         </div>
     </div>
