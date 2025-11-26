@@ -396,6 +396,26 @@
     box-shadow: 0 0 12px rgba(220,38,38,0.7);
   }
 
+  /* Reset Save Data button – same style as Restart Story */
+#reset-data-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.9);
+  padding: 0.25rem 0.65rem;
+  background:
+    radial-gradient(circle at top, #111827, #020617);
+  color: #e5e7eb;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease-out;
+  margin-left: 0.35rem;
+}
+
+#reset-data-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(220,38,38,0.7);
+}
+
   @media (max-width: 640px) {
     #game-wrapper {
       margin: 0.75rem;
@@ -440,6 +460,7 @@
     <span id="status-text">Click or tap to choose. Some doors only open once.</span>
     <span id="corruption-meter">Corruption: <strong>0%</strong></span>
     <button id="restart-btn" type="button">Restart Story</button>
+    <button id="reset-data-btn" type="button" class="secondary-btn">Reset Save Data</button>
   </div>
 </div>
 
@@ -1122,8 +1143,26 @@ Not with you.`,
   const corruptionMeterEl = document.getElementById("corruption-meter");
   const tintOverlayEl     = artInnerEl.querySelector(".art-overlay-tint");
   const shadowFigureEl    = document.getElementById("shadow-figure");
+  const resetDataBtn      = document.getElementById("reset-data-btn");
 
   let currentSceneId = "intro";
+
+  if (resetDataBtn) {
+  resetDataBtn.addEventListener("click", () => {
+    localStorage.removeItem("lastCreditCorruption");
+    localStorage.removeItem("lastCreditRunCount");
+    localStorage.removeItem("lastCreditSeenEndings");
+
+    corruption = 0;
+    runCount = 0;
+    seenEndings = {};
+    endingsFound = { good: false, bad: false, secret: false };
+
+    updateCorruptionVisual();
+    updateEndingsUI();
+    statusTextEl.textContent = "Save data wiped. The cabinet forgot you (for now).";
+  });
+}
 
   // ========= UI HELPERS =========
   function updateEndingsUI() {
