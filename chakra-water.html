@@ -1,146 +1,283 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light dark">
-    <title>Store</title>
-    <link href="style.css" rel="stylesheet">
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Chakra Water · Store Name</title>
+
+  <!-- Your main styles -->
+  <link href="style.css" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+    crossorigin="anonymous"
+  >
+
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+  >
+
+  <style>
+    body {
+      background-color: var(--bs-body-bg);
+    }
+
+    .navbar {
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
+
+    .navbar-brand span {
+      color: var(--bs-primary);
+    }
+
+    .searchBar {
+      max-width: 340px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .searchBar {
+        margin-top: 0.75rem !important;
+        width: 100%;
+      }
+    }
+
+    .product-image-card img {
+      object-fit: cover;
+      width: 100%;
+      max-height: 420px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+  </style>
 </head>
 <body>
-    <!-- NavBar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
-  <div class="container-fluid">
-    <a title="Cart" href="cart.html" type="button"><i class="cart bi bi-cart4 position-relative m-2"></i><span id="cartBadge" class="top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
-    <span id="priceTotal"></span></a>
-    <a class="navbar-brand" href="index.html">Offcanvas navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Offcanvas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Dropdown
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-        </ul>
-        <form class="d-flex mt-3" role="search" action="search.html" method="GET">
-            <input id="searchInput" name="q" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-            <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-      </div>
-    </div>
-    </div>
-    </nav>
 
-    <!-- Main Content -->
-     <div class="container mb-3">
-        <div class="row">
-            <div class="col-12 col-md-6">
-                <div id="carouselExampleIndicators" class="carousel slide carousel-dark">
-  <div class="carousel-indicators">
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-  </div>
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="bottle.jpg" class="d-block w-100" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="bottle-3.jpg" class="d-block w-100" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="bottle-4.jpg" class="d-block w-100" alt="...">
-    </div>
-  </div>
-  <button class="carousel-control-prev btn-success" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>
-            </div>
-            <div class="col-12 mt-3">
-                <h4>
-                    Chakra Water
-                </h4>
-                <h5>
-                    $25.99
-                </h5>
-                <p>
-                    Reiki infused water.
-                </p>
-                <div class="btn-group mt-auto" role="group"
-                            aria-label="Chakra Water quantity controls"
-                            data-product-id="chakraWater">
-                            <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus">
-                                <i class="bi bi-cart-dash"></i>
-                            </button>
-                            <button id="qty-chakraWater" type="button" class="btn btn-outline-secondary" disabled>
-                                0
-                            </button>
-                            <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus">
-                                <i class="bi bi-cart-plus"></i>
-                            </button>
-                        </div>
+  <!-- ===================== -->
+  <!--     NAVBAR / HEADER   -->
+  <!-- ===================== -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
+    <div class="container-fluid px-3 px-md-4">
 
-            </div>
+      <a title="Home" href="index.html" class="me-2">
+        <i class="navBtn bi bi-house-door fs-5"></i>
+      </a>
+
+      <a class="navbar-brand me-3" href="index.html">
+        <span>Store</span> Name
+      </a>
+
+      <button
+        title="Main Menu"
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mainNavbar"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-3">
+          <form class="searchBar d-flex mt-3 mt-md-0" role="search" action="search.html" method="GET">
+            <input
+              id="searchInput"
+              name="q"
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button
+              id="searchBtn"
+              title="Search"
+              class="searchBtn btn btn-outline-primary"
+              type="submit"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+          </form>
         </div>
-     </div>
-    
-
-    <script type="module" src="app.js"></script>
-
-    <script>
-  (function () {
-    const prefersDark = window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    // Set Bootstrap theme based on system preference
-    document.documentElement.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
-  })();
-</script>
-
-<!-- Cart Toast -->
-<div class="toast position-fixed bottom-0 end-0 p-3">
-  <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body">
-        Item added to cart.
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+
+    </div>
+  </nav>
+
+  <!-- ===================== -->
+  <!--     MAIN CONTENT      -->
+  <!-- ===================== -->
+  <main class="container my-4 my-md-5">
+    <div class="row g-4">
+      <!-- LEFT: Product Image -->
+      <div class="col-12 col-md-6">
+        <div class="card product-image-card h-100 shadow-sm">
+          <img
+            src="chakra-water.png"
+            class="card-img-top"
+            alt="Chakra Water"
+          >
+        </div>
+      </div>
+
+      <!-- RIGHT: Product Details -->
+      <div class="col-12 col-md-6">
+        <div class="d-flex flex-column h-100">
+
+          <!-- Product Title -->
+          <h1 class="h3 mb-1">Chakra Water</h1>
+
+          <!-- Short tagline -->
+          <p class="text-muted mb-2">
+            Reiki-infused water created to support balance, grounding, and gentle alignment.
+          </p>
+
+          <!-- Price -->
+          <p class="fs-4 fw-bold mb-1">$24.99</p>
+
+          <!-- Live stock text (filled by JS) -->
+          <p id="stock-chakraWater" class="text-muted small mb-3">
+            <!-- JS fills this with "In stock: X" or "Out of stock" -->
+          </p>
+
+          <hr>
+
+          <!-- Description -->
+          <section class="mb-3">
+            <h2 class="section-title">Description</h2>
+            <p>
+              Chakra Water is prepared in small batches with focused intention and reiki energy.
+              Use it as part of your daily ritual—to bless your altar, anoint your hands before meditation,
+              or simply keep nearby as a reminder to breathe and reset.
+            </p>
+            <ul>
+              <li>Reiki-charged for gentle energetic alignment</li>
+              <li>Crafted with intention for grounding and clarity</li>
+              <li>Perfect for altar work, ritual, and personal practice</li>
+              <li>Bottled in small batches for quality and potency</li>
+            </ul>
+          </section>
+
+          <!-- Usage -->
+          <section class="mb-3">
+            <h2 class="section-title h6">How to Use</h2>
+            <p class="mb-1">
+              Hold the bottle in both hands and take a slow, deep breath.
+              Visualize your chakras as a column of light from crown to root.
+              You can lightly mist your space (if bottled that way), anoint your hands,
+              or keep the bottle on your altar to anchor your intention.
+            </p>
+          </section>
+
+          <hr>
+
+          <!-- Quantity / Cart controls -->
+          <div class="mb-3">
+            <h2 class="section-title h6">Checkout</h2>
+
+            <!--
+              IMPORTANT:
+              - data-product-id must match your PRODUCT_DATA key (chakraWater)
+              - qty button id must be: qty-<productId>
+            -->
+            <div
+              class="btn-group"
+              role="group"
+              aria-label="Chakra Water quantity controls"
+              data-product-id="chakraWater"
+              data-product-name="Chakra Water"
+              data-product-price="24.99"
+            >
+            </div>
+
+            <small class="d-block text-muted mt-2">
+              Use the green cart button to checkout.
+            </small>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="mt-auto d-flex flex-wrap gap-2">
+            <a
+              href="https://buy.stripe.com/5kQbJ2cbifFW3DBedPbII01"
+              class="btn btn-outline-success"
+            >
+              Buy Now
+            </a>
+            <a href="index.html" class="btn btn-outline-secondary">
+              Back to Shop
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== -->
+  <!--   SCRIPTS / APP JS    -->
+  <!-- ===================== -->
+
+  <!-- Bootstrap JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"
+  ></script>
+
+  <!-- Your main store logic -->
+  <script type="module" src="app.js"></script>
+
+  <!-- Dark / light mode based on system preference -->
+  <script>
+    (function () {
+      const prefersDark = window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      document.documentElement.setAttribute(
+        'data-bs-theme',
+        prefersDark ? 'dark' : 'light'
+      );
+    })();
+  </script>
+
+  <!-- Optional: Cart Toast (if your app.js uses it globally) -->
+  <div class="toast position-fixed bottom-0 end-0 p-3">
+    <div
+      id="cartToast"
+      class="toast align-items-center text-bg-success border-0"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">
+          Item updated in cart.
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close">
+        </button>
+      </div>
     </div>
   </div>
-</div>
-
 
 </body>
 </html>

@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title>Protection Candle</title>
+  <title>Protection Candle · Store Name</title>
 
   <!-- Your main styles -->
   <link href="style.css" rel="stylesheet">
@@ -24,40 +23,114 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
   >
 
+  <style>
+    body {
+      background-color: var(--bs-body-bg);
+    }
+
+    .navbar {
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
+
+    .navbar-brand span {
+      color: var(--bs-primary);
+    }
+
+    .searchBar {
+      max-width: 340px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .searchBar {
+        margin-top: 0.75rem !important;
+        width: 100%;
+      }
+    }
+
+    .product-image-card img {
+      object-fit: cover;
+      width: 100%;
+      max-height: 420px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+  </style>
 </head>
 <body>
 
   <!-- ===================== -->
   <!--     NAVBAR / HEADER   -->
   <!-- ===================== -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
-  <div class="container-fluid">
-    
-    <a class="navbar-brand" href="index.html">Store Name</a>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
+    <div class="container-fluid px-3 px-md-4">
 
-    <form class="searchBar d-flex mt-3" role="search" action="search.html" method="GET">
-            <input id="searchInput" name="q" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-            <button id="searchBtn" title="Search" class="searchBtn btn btn-outline-success" type="submit"><i class="bi bi-search"></i></button>
-        </form>
+      <a title="Home" href="index.html" class="me-2">
+        <i class="navBtn bi bi-house-door fs-5"></i>
+      </a>
 
-    <a title="Cart" href="cart.html" type="button"><i class="cart bi bi-cart4 position-relative"></i><span id="cartBadge" class="top-0 start-100 translate-middle badge rounded-pill bg-danger"></span></a>
+      <a class="navbar-brand me-3" href="index.html">
+        <span>Store</span> Name
+      </a>
 
+      <button
+        title="Main Menu"
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mainNavbar"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-3">
+          <form class="searchBar d-flex mt-3 mt-md-0" role="search" action="search.html" method="GET">
+            <input
+              id="searchInput"
+              name="q"
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button
+              id="searchBtn"
+              title="Search"
+              class="searchBtn btn btn-outline-primary"
+              type="submit"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+          </form>
+
+        </div>
       </div>
+
     </div>
-    </div>
-    </nav>
+  </nav>
 
   <!-- ===================== -->
   <!--     MAIN CONTENT      -->
   <!-- ===================== -->
-  <main class="container my-4">
+  <main class="container my-4 my-md-5">
     <div class="row g-4">
-      <!-- LEFT: Product Image(s) -->
+      <!-- LEFT: Product Image -->
       <div class="col-12 col-md-6">
-        <div class="card h-100">
-          <!-- Single image; you can also use a Bootstrap carousel here if you want multiple angles -->
+        <div class="card product-image-card h-100 shadow-sm">
           <img
-            src="protection-candle-img.png"  
+            src="protection-candle-img.png"
             class="card-img-top"
             alt="Protection Candle"
           >
@@ -67,8 +140,9 @@
       <!-- RIGHT: Product Details -->
       <div class="col-12 col-md-6">
         <div class="d-flex flex-column h-100">
+
           <!-- Product Title -->
-          <h1 class="h3 mb-1">Protection Candle</h1> <!-- 🔁 change name -->
+          <h1 class="h3 mb-1">Protection Candle</h1>
 
           <!-- Short tagline -->
           <p class="text-muted mb-2">
@@ -76,18 +150,18 @@
           </p>
 
           <!-- Price -->
-          <p class="fs-4 fw-bold mb-1">$12.99</p> <!-- 🔁 change price text if you want -->
+          <p class="fs-4 fw-bold mb-1">$12.99</p>
 
-          <!-- Live stock text (driven by Firestore + JS) -->
+          <!-- Live stock text (filled by JS) -->
           <p id="stock-protectionCandle" class="text-muted small mb-3">
             <!-- JS fills this with "In stock: X" or "Out of stock" -->
           </p>
 
           <hr>
 
-          <!-- Longer description / features -->
+          <!-- Description -->
           <section class="mb-3">
-            <h2 class="h5">Description</h2>
+            <h2 class="section-title">Description</h2>
             <p>
               Each Protection Candle is hand-poured with care, using a clean-burning wax blend and
               herbs traditionally associated with shielding, grounding, and spiritual protection.
@@ -101,9 +175,9 @@
             </ul>
           </section>
 
-          <!-- Usage / ritual ideas (optional extra block) -->
+          <!-- Usage -->
           <section class="mb-3">
-            <h2 class="h6">How to Use</h2>
+            <h2 class="section-title h6">How to Use</h2>
             <p class="mb-1">
               Write your intention on a small piece of paper and place it beneath the candle.
               As you light the wick, breathe deeply and imagine a circle of light surrounding you.
@@ -112,9 +186,13 @@
 
           <hr>
 
+          <!-- Quantity / Cart controls -->
+          <div class="mb-3">
+            <h2 class="section-title h6">Checkout</h2>
+
             <!--
               IMPORTANT:
-              - data-product-id MUST match your PRODUCT_DATA key (here: protectionCandle)
+              - data-product-id must match your PRODUCT_DATA key (protectionCandle)
               - qty button id must be: qty-<productId>
             -->
             <div
@@ -126,17 +204,25 @@
               data-product-price="12.99"
             >
             </div>
+
+            <small class="d-block text-muted mt-2">
+              Use the green cart button to checkout.
+            </small>
           </div>
 
           <!-- Action buttons -->
           <div class="mt-auto d-flex flex-wrap gap-2">
-            <a href="https://buy.stripe.com/5kQbJ2cbifFW3DBedPbII01" class="btn btn-outline-success">
+            <a
+              href="https://buy.stripe.com/5kQbJ2cbifFW3DBedPbII01"
+              class="btn btn-outline-success"
+            >
               Buy Now
             </a>
             <a href="index.html" class="btn btn-outline-secondary">
               Back to Shop
             </a>
           </div>
+
         </div>
       </div>
     </div>
@@ -168,6 +254,29 @@
       );
     })();
   </script>
+
+  <!-- Optional: Cart Toast (if your app.js uses it globally) -->
+  <div class="toast position-fixed bottom-0 end-0 p-3">
+    <div
+      id="cartToast"
+      class="toast align-items-center text-bg-success border-0"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">
+          Item updated in cart.
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close">
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
-
