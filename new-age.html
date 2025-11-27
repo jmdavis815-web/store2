@@ -4,213 +4,445 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title>New Age Products</title>
+  <title>New Age · Store Name</title>
 
+  <!-- Your custom styles -->
   <link href="style.css" rel="stylesheet">
 
   <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+    crossorigin="anonymous"
+  >
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous">
+  </script>
 
   <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-</head>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+  >
 
+  <style>
+    body {
+      background-color: var(--bs-body-bg);
+    }
+
+    .navbar {
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
+
+    .navbar-brand span {
+      color: var(--bs-primary);
+    }
+
+    .searchBar {
+      max-width: 340px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .searchBar {
+        margin-top: 0.75rem !important;
+        width: 100%;
+      }
+    }
+
+    .nav-tabs {
+      border-bottom: none;
+    }
+
+    .nav-tabs .nav-link {
+      border: none;
+      border-radius: 999px;
+      padding-inline: 1.2rem;
+      color: var(--bs-secondary-color);
+      font-size: 0.9rem;
+    }
+
+    .nav-tabs .nav-link.active {
+      background-color: var(--bs-primary-bg-subtle);
+      color: var(--bs-primary);
+      font-weight: 600;
+    }
+
+    .nav-tabs-wrapper {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .hero-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.45),
+        rgba(0, 0, 0, 0.75)
+      );
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .product-card {
+      border-radius: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 38px rgba(15, 23, 42, 0.16);
+      border-color: var(--bs-primary);
+    }
+
+    .product-card .card-img-top {
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+      object-fit: cover;
+      width: 100%;
+      height: 240px;
+    }
+  </style>
+</head>
 <body>
 
   <!-- NavBar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
-  <div class="container-fluid">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+    <div class="container-fluid px-3 px-md-4">
 
-    <a title="Home" href="index.html"><i class="navBtn bi bi-house-door"></i></a>
-    
-    <a class="navbar-brand" href="index.html">Store Name</a>
+      <a title="Home" href="index.html" class="me-2">
+        <i class="navBtn bi bi-house-door fs-5"></i>
+      </a>
 
-    <form class="searchBar d-flex mt-3" role="search" action="search.html" method="GET">
-            <input id="searchInput" name="q" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-            <button id="searchBtn" title="Search" class="searchBtn btn btn-outline-success" type="submit"><i class="bi bi-search"></i></button>
-        </form>
+      <a class="navbar-brand me-3" href="index.html">
+        <span>Store</span> Name
+      </a>
 
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mainNavbar"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-2">
+          <form class="searchBar d-flex" role="search" action="search.html" method="GET">
+            <input
+              id="searchInput"
+              name="q"
+              class="form-control me-2"
+              type="search"
+              placeholder="Search products"
+              aria-label="Search"
+            />
+            <button
+              id="searchBtn"
+              title="Search"
+              class="searchBtn btn btn-outline-primary"
+              type="submit"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+          </form>
+        </div>
       </div>
+
     </div>
-    </div>
-    </nav>
+  </nav>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-3">
-      <li class="nav-item">
-        <a class="nav-link" href="art.html">Art</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" href="new-age.html">New Age</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="arcade.html">Arcade</a>
-      </li>
-    </ul>
-
-  <!-- ============================= -->
-  <!-- TOP BANNER ROW (matches index) -->
-  <!-- ============================= -->
-
-  <div class="container">
-    <div class="row">
-
-      <!-- Left: Chakra Water carousel -->
-      <div class="col-12 col-md-4 mb-3">
-        <div id="newAgeCarousel" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner">
-
-            <div class="carousel-item active">
-              <div class="card">
-                <img src="chakra-water.png" class="w-100 rounded-start" alt="Chakra Water">
-              </div>
-            </div>
-
-            <div class="carousel-item">
-              <div class="card">
-                <img src="protection-candle-img.png" class="w-100 rounded-start" alt="Protection Candle">
-              </div>
-            </div>
-
-            <div class="carousel-item">
-              <div class="card">
-                <img src="amethyst-candle.png" class="w-100 rounded-start" alt="Reiki Candle">
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Middle: Chakra Water link -->
-      <div class="col-12 col-md-4 mb-3">
-        <div class="card">
-          <img src="chakra-water.png" class="img-fluid rounded-start" alt="Chakra Water">
-        </div>
-      </div>
-
-      <!-- Right: Candles gallery -->
-      <div class="col-12 col-md-4 mb-3">
-        <div class="card">
-          <img src="protection-candle-img.png" class="img-fluid rounded-start" alt="Candles">
-        </div>
-      </div>
-
+  <!-- Tabs -->
+  <div class="nav-tabs-wrapper bg-body-tertiary">
+    <div class="container">
+      <ul class="nav nav-tabs py-2 mb-0">
+        <li class="nav-item">
+          <a class="nav-link" href="art.html">Art</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="new-age.html">New Age</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="arcade.html">Arcade</a>
+        </li>
+      </ul>
     </div>
   </div>
 
+  <!-- HERO BANNER -->
+  <section class="container my-4">
+    <div class="card border-0 text-white">
+      <img src="new-age.png" class="card-img" alt="New Age Banner">
+      <div class="card-img-overlay hero-overlay d-flex flex-column justify-content-center align-items-center text-center">
+        <h1 class="display-5 fw-bold mb-2">New Age & Reiki</h1>
+        <p class="lead mb-0">
+          Candles, chakra water, and tools to support calm, focus, and intention.
+        </p>
+      </div>
+    </div>
+  </section>
 
-  <!-- ============================= -->
-  <!-- PRODUCT GRID (matches index) -->
-  <!-- ============================= -->
+  <!-- INTRO + FEATURED PRODUCTS -->
+  <section class="container mb-5">
+    <div class="row g-4 align-items-center">
 
-  <div class="container">
-    <div class="row">
+      <!-- Intro text -->
+      <div class="col-12 col-lg-5">
+        <h2 class="section-title">Center Yourself</h2>
+        <p class="text-muted">
+          This collection brings together your energy-based products—reiki-infused items,
+          ritual candles, chakra water, and more. As you create new offerings, you can add
+          them here with clear descriptions and pricing.
+        </p>
+        <p class="text-muted">
+          Start with your signature pieces below, then duplicate their cards as your line grows.
+        </p>
+      </div>
 
-      <!-- Chakra Water -->
-      <div class="col-6 col-md-6 col-lg-3 mb-3">
-        <div class="card h-100 shadow-sm">
+      <!-- Featured products -->
+      <div class="col-12 col-lg-7">
+        <div class="row g-3">
+          <!-- Chakra Water -->
+          <div class="col-12 col-md-6">
+            <div class="card product-card h-100">
+              <a href="chakra-water.html">
+                <img src="chakra-water.png" class="card-img-top" alt="Chakra Water">
+              </a>
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-1">Chakra Water</h5>
+                <p class="text-muted small mb-2">Reiki-infused water for daily balance.</p>
+                <p class="fw-bold mb-2">$24.99</p>
+                <p class="small flex-grow-1">
+                  Placeholder copy: use this space to describe the intention, process, and
+                  suggested use for your chakra water.
+                </p>
 
-          <a href="chakra-water.html">
-            <img src="chakra-water.png" class="item-img card-img-top" alt="Chakra Water">
-          </a>
+                <div class="mt-2">
+                  <div
+                    class="btn-group"
+                    role="group"
+                    aria-label="Chakra Water quantity controls"
+                    data-product-id="chakraWater"
+                  >
+                    <button
+                      title="Remove Item"
+                      type="button"
+                      class="btn btn-outline-danger btn-cart-minus"
+                    >
+                      <i class="bi bi-cart-dash"></i>
+                    </button>
+                    <button
+                      id="qty-chakraWater"
+                      type="button"
+                      class="btn btn-outline-secondary"
+                      disabled
+                    >
+                      0
+                    </button>
+                    <button
+                      title="Add Item"
+                      type="button"
+                      class="btn btn-outline-success btn-cart-plus"
+                    >
+                      <i class="bi bi-cart-plus"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- Protection Candle -->
+          <div class="col-12 col-md-6">
+            <div class="card product-card h-100">
+              <a href="protection-candle.html">
+                <img src="protection-candle-img.png" class="card-img-top" alt="Protection Candle">
+              </a>
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-1">Protection Candle</h5>
+                <p class="text-muted small mb-2">Hand-poured intention candle.</p>
+                <p class="fw-bold mb-2">$12.99</p>
+                <p class="small flex-grow-1">
+                  Placeholder copy: share what herbs, oils, or symbols are used, and how
+                  customers can work with this candle.
+                </p>
+
+                <div class="mt-2">
+                  <div
+                    class="btn-group"
+                    role="group"
+                    aria-label="Protection Candle quantity controls"
+                    data-product-id="protectionCandle"
+                  >
+                    <button
+                      title="Remove Item"
+                      type="button"
+                      class="btn btn-outline-danger btn-cart-minus"
+                    >
+                      <i class="bi bi-cart-dash"></i>
+                    </button>
+                    <button
+                      id="qty-protectionCandle"
+                      type="button"
+                      class="btn btn-outline-secondary"
+                      disabled
+                    >
+                      0
+                    </button>
+                    <button
+                      title="Add Item"
+                      type="button"
+                      class="btn btn-outline-success btn-cart-plus"
+                    >
+                      <i class="bi bi-cart-plus"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /.row -->
+      </div>
+    </div>
+  </section>
+
+  <!-- NEW AGE GRID -->
+  <section class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="section-title mb-0">New Age Collection</h3>
+      <span class="small text-muted">
+        Add more items here as your product line grows.
+      </span>
+    </div>
+
+    <div class="row g-4">
+      <!-- Reiki Healing Candle -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card product-card h-100">
+          <img src="protection-candle-img.png" class="card-img-top" alt="Reiki Healing Candle">
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-1">Chakra Water</h5>
-            <p class="text-muted mb-2">Reiki infused water.</p>
-
-            <p class="fw-bold mb-1">$24.99</p>
-            <p id="stock-chakraWater" class="text-muted small mb-3"></p>
-
-            <div class="btn-group mt-auto" role="group" aria-label="Chakra Water qty" data-product-id="chakraWater">
-              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
-              <button id="qty-chakraWater" type="button" class="btn btn-outline-secondary" disabled>0</button>
-              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
+            <h5 class="card-title mb-1">Reiki Healing Candle</h5>
+            <p class="text-muted small mb-2">Soy / beeswax blend · Placeholder</p>
+            <p class="fw-bold mb-2">$14.99</p>
+            <p class="small flex-grow-1">
+              Describe the intention, scent, and any crystals or herbs used.
+            </p>
+            <div class="mt-2">
+              <div
+                class="btn-group"
+                role="group"
+                aria-label="Healing Candle quantity controls"
+                data-product-id="healingCandle"
+              >
+                <button
+                  title="Remove Item"
+                  type="button"
+                  class="btn btn-outline-danger btn-cart-minus"
+                >
+                  <i class="bi bi-cart-dash"></i>
+                </button>
+                <button
+                  id="qty-healingCandle"
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  disabled
+                >
+                  0
+                </button>
+                <button
+                  title="Add Item"
+                  type="button"
+                  class="btn btn-outline-success btn-cart-plus"
+                >
+                  <i class="bi bi-cart-plus"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Protection Candle -->
-      <div class="col-6 col-md-6 col-lg-3 mb-3">
-        <div class="card h-100 shadow-sm">
-
-          <a href="protection-candle.html">
-            <img src="protection-candle-img.png" class="item-img card-img-top" alt="Protection Candle">
-          </a>
-
+      <!-- Crystal Kit -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card product-card h-100">
+          <img src="bottle-4.jpg" class="card-img-top" alt="Crystal Kit">
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-1">Protection Candle</h5>
-            <p class="text-muted mb-2">Hand-poured protection spell candle.</p>
-
-            <p class="fw-bold mb-1">$12.99</p>
-            <p id="stock-protectionCandle" class="text-muted small mb-3"></p>
-
-            <div class="btn-group mt-auto" role="group" aria-label="Protection Candle qty" data-product-id="protectionCandle">
-              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
-              <button id="qty-protectionCandle" type="button" class="btn btn-outline-secondary" disabled>0</button>
-              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
+            <h5 class="card-title mb-1">Crystal Starter Kit</h5>
+            <p class="text-muted small mb-2">Tumbled stones · Placeholder</p>
+            <p class="fw-bold mb-2">$18.99</p>
+            <p class="small flex-grow-1">
+              List which stones are included and what they’re great for.
+            </p>
+            <div class="mt-2">
+              <div
+                class="btn-group"
+                role="group"
+                aria-label="Crystal Kit quantity controls"
+                data-product-id="crystalKit"
+              >
+                <button
+                  title="Remove Item"
+                  type="button"
+                  class="btn btn-outline-danger btn-cart-minus"
+                >
+                  <i class="bi bi-cart-dash"></i>
+                </button>
+                <button
+                  id="qty-crystalKit"
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  disabled
+                >
+                  0
+                </button>
+                <button
+                  title="Add Item"
+                  type="button"
+                  class="btn btn-outline-success btn-cart-plus"
+                >
+                  <i class="bi bi-cart-plus"></i>
+                </button>
+              </div>
             </div>
-
           </div>
         </div>
       </div>
 
-      <!-- Amethyst Candle -->
-      <div class="col-6 col-md-6 col-lg-3 mb-3">
-        <div class="card h-100 shadow-sm">
-
-          <a href="#">
-            <img src="amethyst-candle.png" class="card-img-top" alt="Amethyst Candle">
-          </a>
-
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-1">Amethyst Candle</h5>
-            <p class="text-muted mb-2">Reiki charged with amethyst chips.</p>
-
-            <p class="fw-bold mb-1">$18.99</p>
-            <p id="stock-amethystCandle" class="text-muted small mb-3"></p>
-
-            <div class="btn-group mt-auto" role="group" aria-label="Amethyst Candle qty" data-product-id="amethystCandle">
-              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
-              <button id="qty-amethystCandle" type="button" class="btn btn-outline-secondary" disabled>0</button>
-              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Rose Quartz Candle -->
-      <div class="col-6 col-md-6 col-lg-3 mb-3">
-        <div class="card h-100 shadow-sm">
-
-          <a href="#">
-            <img src="rose-quartz-candle.png" class="card-img-top" alt="Rose Quartz Candle">
-          </a>
-
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-1">Rose Quartz Candle</h5>
-            <p class="text-muted mb-2">Soft love energy + rose quartz chips.</p>
-
-            <p class="fw-bold mb-1">$18.99</p>
-            <p id="stock-roseQuartzCandle" class="text-muted small mb-3"></p>
-
-            <div class="btn-group mt-auto" role="group" aria-label="Rose Quartz Candle qty" data-product-id="roseQuartzCandle">
-              <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus"><i class="bi bi-cart-dash"></i></button>
-              <button id="qty-roseQuartzCandle" type="button" class="btn btn-outline-secondary" disabled>0</button>
-              <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus"><i class="bi bi-cart-plus"></i></button>
-            </div>
-
+      <!-- Smudge Bundle Placeholder -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card h-100 border-0 bg-body-secondary text-center d-flex flex-column justify-content-center">
+          <div class="card-body">
+            <p class="mb-1 fw-semibold">Future New Age Item</p>
+            <p class="text-muted small mb-2">
+              Add another candle, spray, or bundle here when you’re ready.
+            </p>
+            <p class="text-muted small mb-0">
+              Duplicate one of the product cards and give it a new
+              <code>data-product-id</code> to connect it to your cart.
+            </p>
           </div>
         </div>
       </div>
 
     </div>
-  </div>
+  </section>
 
-  <!-- THEME SYNC -->
+  <!-- Dark / light theme sync -->
   <script>
     (function () {
       const prefersDark = window.matchMedia &&
@@ -219,15 +451,28 @@
     })();
   </script>
 
+  <!-- Your main JS (needed) -->
   <script src="app.js" type="module"></script>
 
   <!-- Cart Toast -->
   <div class="toast position-fixed bottom-0 end-0 p-3">
-    <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div
+      id="cartToast"
+      class="toast align-items-center text-bg-success border-0"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
       <div class="d-flex">
-        <div class="toast-body">Item added to cart.</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                data-bs-dismiss="toast" aria-label="Close"></button>
+        <div class="toast-body">
+          Item updated in cart.
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close">
+        </button>
       </div>
     </div>
   </div>

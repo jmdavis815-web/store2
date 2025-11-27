@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Arcade Shooter</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #game-container {
+      border: 4px solid #444;
+      background: #000;
+      image-rendering: pixelated;
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      background: radial-gradient(circle at top, #111 0%, #000 60%, #000 100%);
+    }
+
+    #ui-overlay {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      text-shadow: 1px 1px 0 #000;
+      pointer-events: none;
+    }
+
+    #center-message {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      pointer-events: none;
+      font-family: "Courier New", monospace;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    #center-message h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    #center-message p {
+      font-size: 16px;
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game" width="800" height="600"></canvas>
+    <div id="ui-overlay">
+      <div id="score-display">Score: 0</div>
+      <div id="lives-display">Lives: 3</div>
+      <div id="wave-display">Wave: 1</div>
+    </div>
+    <div id="center-message"></div>
+  </div>
+
+  <script>
+    // ==========================
+    // BASIC SETUP
+    // ==========================
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const scoreEl = document.getElementById("score-display");
+    const livesEl = document.getElementById("lives-display");
+    const waveEl = document.getElementById("wave-display");
+    const centerMessage = document.getElementById("center-message");
+
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+
+    // ==========================
+    // GAME STATE
+    // ==========================
+    const STATE = {
+      PLAYING: "PLAYING",
+      BOSS: "BOSS",
+      GAME_OVER: "GAME_OVER",
+      VICTORY: "VICTORY",
+      TITLE: "TITLE",
+    };
+
+    let gameState = STATE.TITLE;
+
+    let keys = {};
+    let lastTime = 0;
+
+    let player;
+    let bullets = [];
+    let enemyBullets = [];
+    let enemies = [];
+    let boss = null;
+
+    let score = 0;
+    let lives = 3;
+    let wave = 1;
+    let kills = 0;
+    const KILLS_FOR_BOSS = 20; // how many enemies before boss appears
+
+    // ==========================
+    // INPUT
+    // ==========================
+    window.addEventListener("keydown", (e) => {
+      keys[e.code] = true;
+
+      // Start or restart with Enter
+      if ((gameState === STATE.TITLE || gameState === STATE.GAME_OVER || gameState === STATE.VICTORY) &&
+          (e.code === "Enter" || e.code === "Space")) {
+        startGame();
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      keys[e.code] = false;
+    });
+
+    // ==========================
+    // OBJECT HELPERS
+    // ==========================
+    function createPlayer() {
+      return {
+        x: WIDTH / 2 - 16,
+        y: HEIGHT - 80,
+        width: 32,
+        height: 32,
+        speed: 260,
+        color: "#0f0",
+        lastShot: 0,
+        shotCooldown: 220, // ms
+      };
+    }
+
+    function createEnemy(x, y, speed) {
+      return {
+        x,
+        y,
+        width: 28,
+        height: 28,
+        speed,
+        color: "#f22",
+        offset: Math.random() * Math.PI * 2,
+      };
+    }
+
+    function createBoss() {
+      return {
+        x: WIDTH / 2 - 80,
+        y: 70,
+        width: 160,
+        height: 60,
+        color: "#c0f",
+        hp: 60,
+        maxHp: 60,
+        speedX: 140,
+        shootCooldown: 650,
+        lastShot: 0,
+      };
+    }
+
+    function shootBullet(from, vy) {
+      bullets.push({
+        x: from.x + from.width / 2 - 3,
+        y: from.y,
+        width: 6,
+        height: 12,
+        vy,
+        color: "#ff0",
+      });
+    }
+
+    function shootEnemyBullet(from, vy) {
+      enemyBullets.push({
+        x: from.x + from.width / 2 - 3,
+        y: from.y + from.height,
+        width: 6,
+        height: 12,
+        vy,
+        color: "#0ff",
+      });
+    }
+
+    // ==========================
+    // COLLISION
+    // ==========================
+    function rectsOverlap(a, b) {
+      return !(
+        a.x + a.width < b.x ||
+        a.x > b.x + b.width ||
+        a.y + a.height < b.y ||
+        a.y > b.y + b.height
+      );
+    }
+
+    // ==========================
+    // SPAWNING
+    // ==========================
+    let enemySpawnTimer = 0;
+    let enemySpawnInterval = 900; // ms
+
+    function updateEnemySpawning(dt) {
+      if (gameState !== STATE.PLAYING) return;
+
+      enemySpawnTimer += dt;
+      if (enemySpawnTimer >= enemySpawnInterval) {
+        enemySpawnTimer = 0;
+
+        const x = 40 + Math.random() * (WIDTH - 80);
+        const speed = 60 + Math.random() * 60 + wave * 5;
+        enemies.push(createEnemy(x, -40, speed));
+      }
+    }
+
+    function maybeSpawnBoss() {
+      if (!boss && kills >= KILLS_FOR_BOSS && (gameState === STATE.PLAYING || gameState === STATE.BOSS)) {
+        boss = createBoss();
+        gameState = STATE.BOSS;
+        showCenterMessage(
+          "BOSS INCOMING",
+          [
+            "The Void Warden descends...",
+            "",
+            "DODGE the blue shots.",
+            "HIT the boss to drain its HP.",
+          ]
+        );
+        setTimeout(clearCenterMessage, 2500);
+      }
+    }
+
+    // ==========================
+    // UPDATES
+    // ==========================
+    function updatePlayer(dt) {
+      if (!player) return;
+
+      let dx = 0;
+      let dy = 0;
+
+      if (keys["ArrowLeft"] || keys["KeyA"]) dx -= 1;
+      if (keys["ArrowRight"] || keys["KeyD"]) dx += 1;
+      if (keys["ArrowUp"] || keys["KeyW"]) dy -= 1;
+      if (keys["ArrowDown"] || keys["KeyS"]) dy += 1;
+
+      const length = Math.hypot(dx, dy) || 1;
+      dx /= length;
+      dy /= length;
+
+      player.x += dx * player.speed * dt / 1000;
+      player.y += dy * player.speed * dt / 1000;
+
+      // clamp to screen
+      player.x = Math.max(0, Math.min(WIDTH - player.width, player.x));
+      player.y = Math.max(0, Math.min(HEIGHT - player.height, player.y));
+
+      // shooting
+      const now = performance.now();
+      if ((keys["Space"] || keys["KeyJ"]) && now - player.lastShot > player.shotCooldown) {
+        player.lastShot = now;
+        shootBullet(player, -420);
+      }
+    }
+
+    function updateBullets(dt) {
+      bullets.forEach((b) => {
+        b.y += b.vy * dt / 1000;
+      });
+      bullets = bullets.filter((b) => b.y + b.height > -20 && b.y < HEIGHT + 20);
+
+      enemyBullets.forEach((b) => {
+        b.y += b.vy * dt / 1000;
+      });
+      enemyBullets = enemyBullets.filter((b) => b.y < HEIGHT + 30);
+    }
+
+    function updateEnemies(dt) {
+      enemies.forEach((e) => {
+        e.y += e.speed * dt / 1000;
+        e.x += Math.sin((performance.now() / 600) + e.offset) * 0.6 * (dt / 16);
+
+        // small random shots downwards
+        if (Math.random() < 0.003 + wave * 0.0007) {
+          shootEnemyBullet(e, 230 + wave * 10);
+        }
+      });
+
+      enemies = enemies.filter((e) => e.y < HEIGHT + 40);
+
+      // collisions with player bullets
+      bullets.forEach((b) => {
+        enemies.forEach((e) => {
+          if (rectsOverlap(b, e)) {
+            e.dead = true;
+            b.dead = true;
+            score += 10;
+            kills += 1;
+          }
+        });
+      });
+
+      enemies = enemies.filter((e) => !e.dead);
+      bullets = bullets.filter((b) => !b.dead);
+
+      // collisions with player
+      if (player) {
+        enemies.forEach((e) => {
+          if (rectsOverlap(player, e)) {
+            e.dead = true;
+            damagePlayer();
+          }
+        });
+      }
+    }
+
+    function updateBoss(dt) {
+      if (!boss) return;
+
+      // move left/right
+      boss.x += boss.speedX * dt / 1000;
+      if (boss.x <= 20 || boss.x + boss.width >= WIDTH - 20) {
+        boss.speedX *= -1;
+      }
+
+      const now = performance.now();
+      if (now - boss.lastShot > boss.shootCooldown) {
+        boss.lastShot = now;
+        // fire a small spread
+        for (let i = -1; i <= 1; i++) {
+          enemyBullets.push({
+            x: boss.x + boss.width / 2 - 3 + i * 20,
+            y: boss.y + boss.height,
+            width: 6,
+            height: 12,
+            vy: 260 + Math.abs(i) * 40,
+            color: "#0ff",
+          });
+        }
+      }
+
+      // bullets hitting boss
+      bullets.forEach((b) => {
+        if (rectsOverlap(b, boss)) {
+          b.dead = true;
+          boss.hp -= 1;
+          score += 5;
+        }
+      });
+      bullets = bullets.filter((b) => !b.dead);
+
+      // boss dead?
+      if (boss.hp <= 0) {
+        score += 500;
+        gameState = STATE.VICTORY;
+        showCenterMessage(
+          "YOU WIN!",
+          [
+            "The Void Warden falls.",
+            "",
+            "Score: " + score,
+            "Press ENTER to play again.",
+          ]
+        );
+      }
+    }
+
+    function updateEnemyBulletsAndPlayerCollision() {
+      if (!player) return;
+      enemyBullets.forEach((b) => {
+        if (rectsOverlap(player, b)) {
+          b.dead = true;
+          damagePlayer();
+        }
+      });
+      enemyBullets = enemyBullets.filter((b) => !b.dead);
+    }
+
+    function damagePlayer() {
+      lives -= 1;
+      livesEl.textContent = "Lives: " + lives;
+
+      if (lives <= 0) {
+        // game over
+        gameState = STATE.GAME_OVER;
+        showCenterMessage(
+          "GAME OVER",
+          [
+            "The darkness claims you...",
+            "",
+            "Final score: " + score,
+            "Press ENTER to try again.",
+          ]
+        );
+      } else {
+        // brief "hit" feedback
+        player.x = WIDTH / 2 - player.width / 2;
+        player.y = HEIGHT - 80;
+      }
+    }
+
+    // ==========================
+    // DRAWING
+    // ==========================
+    function drawBackground() {
+      const gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+      gradient.addColorStop(0, "#05050a");
+      gradient.addColorStop(0.5, "#000000");
+      gradient.addColorStop(1, "#020208");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      // starfield dots
+      ctx.fillStyle = "#444";
+      for (let i = 0; i < 40; i++) {
+        const x = (i * 23 + (performance.now() * 0.03)) % WIDTH;
+        const y = (i * 37) % HEIGHT;
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+
+    function drawPlayer() {
+      if (!player) return;
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // little "ship nose"
+      ctx.fillStyle = "#9f9";
+      ctx.fillRect(player.x + player.width / 2 - 4, player.y - 6, 8, 6);
+    }
+
+    function drawEnemies() {
+      enemies.forEach((e) => {
+        ctx.fillStyle = e.color;
+        ctx.fillRect(e.x, e.y, e.width, e.height);
+
+        // eyes
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(e.x + 6, e.y + 8, 5, 5);
+        ctx.fillRect(e.x + e.width - 11, e.y + 8, 5, 5);
+      });
+    }
+
+    function drawBoss() {
+      if (!boss) return;
+
+      // boss body
+      ctx.fillStyle = boss.color;
+      ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
+
+      // "face"
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(boss.x + 20, boss.y + 16, 24, 14);
+      ctx.fillRect(boss.x + boss.width - 44, boss.y + 16, 24, 14);
+
+      // HP bar
+      const barWidth = 260;
+      const barHeight = 12;
+      const x = (WIDTH - barWidth) / 2;
+      const y = 20;
+
+      ctx.fillStyle = "#333";
+      ctx.fillRect(x, y, barWidth, barHeight);
+
+      const hpRatio = Math.max(0, boss.hp / boss.maxHp);
+      ctx.fillStyle = "#f0f";
+      ctx.fillRect(x, y, barWidth * hpRatio, barHeight);
+
+      ctx.strokeStyle = "#fff";
+      ctx.strokeRect(x, y, barWidth, barHeight);
+
+      ctx.font = "12px Courier New";
+      ctx.fillStyle = "#fff";
+      ctx.fillText("BOSS HP", x + 8, y - 4);
+    }
+
+    function drawBullets() {
+      bullets.forEach((b) => {
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, b.y, b.width, b.height);
+      });
+      enemyBullets.forEach((b) => {
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, b.y, b.width, b.height);
+      });
+    }
+
+    // ==========================
+    // UI MESSAGES
+    // ==========================
+    function showCenterMessage(title, lines) {
+      centerMessage.innerHTML = "";
+
+      const h = document.createElement("h1");
+      h.textContent = title;
+      centerMessage.appendChild(h);
+
+      (lines || []).forEach((text) => {
+        const p = document.createElement("p");
+        p.textContent = text;
+        centerMessage.appendChild(p);
+      });
+    }
+
+    function clearCenterMessage() {
+      centerMessage.innerHTML = "";
+    }
+
+    function showTitleScreen() {
+      showCenterMessage(
+        "RAVEN ARCADE: VOID ASSAULT",
+        [
+          "Arrow keys / WASD = Move",
+          "SPACE or J = Fire",
+          "",
+          "Survive the waves.",
+          "Defeat the boss.",
+          "",
+          "Press ENTER or SPACE to begin.",
+        ]
+      );
+    }
+
+    // ==========================
+    // MAIN LOOP
+    // ==========================
+    function gameLoop(timestamp) {
+      const dt = timestamp - lastTime;
+      lastTime = timestamp;
+
+      drawBackground();
+
+      if (gameState === STATE.TITLE) {
+        // just draw stars + title UI
+      } else if (gameState === STATE.PLAYING || gameState === STATE.BOSS) {
+        updateEnemySpawning(dt);
+        updatePlayer(dt);
+        updateBullets(dt);
+        updateEnemies(dt);
+        updateEnemyBulletsAndPlayerCollision();
+        if (boss) {
+          updateBoss(dt);
+        }
+        maybeSpawnBoss();
+        // update wave based on time/score if you like
+        wave = 1 + Math.floor(score / 200);
+        waveEl.textContent = "Wave: " + wave;
+      }
+
+      // draw entities
+      drawPlayer();
+      drawEnemies();
+      drawBoss();
+      drawBullets();
+
+      // HUD text
+      scoreEl.textContent = "Score: " + score;
+      livesEl.textContent = "Lives: " + lives;
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // ==========================
+    // GAME CONTROL
+    // ==========================
+    function resetGameState() {
+      player = createPlayer();
+      bullets = [];
+      enemyBullets = [];
+      enemies = [];
+      boss = null;
+      score = 0;
+      lives = 3;
+      kills = 0;
+      wave = 1;
+      enemySpawnTimer = 0;
+      enemySpawnInterval = 900;
+      scoreEl.textContent = "Score: " + score;
+      livesEl.textContent = "Lives: " + lives;
+      waveEl.textContent = "Wave: " + wave;
+      clearCenterMessage();
+    }
+
+    function startGame() {
+      resetGameState();
+      gameState = STATE.PLAYING;
+    }
+
+    // ==========================
+    // INIT
+    // ==========================
+    showTitleScreen();
+    requestAnimationFrame((t) => {
+      lastTime = t;
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+</html>

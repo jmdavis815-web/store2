@@ -4,59 +4,195 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title>Art Gallery</title>
+  <title>Art Gallery · Store Name</title>
 
   <!-- Your custom styles -->
   <link href="style.css" rel="stylesheet">
 
   <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+    crossorigin="anonymous"
+  >
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous">
+  </script>
 
   <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+  >
+
+  <style>
+    body {
+      background-color: var(--bs-body-bg);
+    }
+
+    .navbar {
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
+
+    .navbar-brand span {
+      color: var(--bs-primary);
+    }
+
+    .searchBar {
+      max-width: 340px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .searchBar {
+        margin-top: 0.75rem !important;
+        width: 100%;
+      }
+    }
+
+    .nav-tabs {
+      border-bottom: none;
+    }
+
+    .nav-tabs .nav-link {
+      border: none;
+      border-radius: 999px;
+      padding-inline: 1.2rem;
+      color: var(--bs-secondary-color);
+      font-size: 0.9rem;
+    }
+
+    .nav-tabs .nav-link.active {
+      background-color: var(--bs-primary-bg-subtle);
+      color: var(--bs-primary);
+      font-weight: 600;
+    }
+
+    .nav-tabs-wrapper {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .hero-overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.45),
+        rgba(0, 0, 0, 0.75)
+      );
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .art-card {
+      border-radius: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
+
+    .art-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 38px rgba(15, 23, 42, 0.16);
+      border-color: var(--bs-primary);
+    }
+
+    .art-card .card-img-top {
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+      object-fit: cover;
+      width: 100%;
+      height: 260px;
+    }
+  </style>
 </head>
 <body>
 
   <!-- NavBar -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
-  <div class="container-fluid">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+    <div class="container-fluid px-3 px-md-4">
 
-    <a title="Home" href="index.html"><i class="navBtn bi bi-house-door"></i></a>
-    
-    <a class="navbar-brand" href="index.html">Store Name</a>
+      <a title="Home" href="index.html" class="me-2">
+        <i class="navBtn bi bi-house-door fs-5"></i>
+      </a>
 
-    <form class="searchBar d-flex mt-3" role="search" action="search.html" method="GET">
-            <input id="searchInput" name="q" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-            <button id="searchBtn" title="Search" class="searchBtn btn btn-outline-success" type="submit"><i class="bi bi-search"></i></button>
-        </form>
+      <a class="navbar-brand me-3" href="index.html">
+        <span>Store</span> Name
+      </a>
 
+      <button
+        title="Main Menu"
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#mainNavbar"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-2">
+          <form class="searchBar d-flex" role="search" action="search.html" method="GET">
+            <input
+              id="searchInput"
+              name="q"
+              class="form-control me-2"
+              type="search"
+              placeholder="Search products"
+              aria-label="Search"
+            />
+            <button
+              id="searchBtn"
+              title="Search"
+              class="searchBtn btn btn-outline-primary"
+              type="submit"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
-    </div>
-    </nav>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-3">
-      <li class="nav-item">
-        <a class="nav-link active" href="art.html">Art</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="new-age.html">New Age</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="arcade.html">Arcade</a>
-      </li>
-    </ul>
+    </div>
+  </nav>
+
+  <!-- Tabs -->
+  <div class="nav-tabs-wrapper bg-body-tertiary">
+    <div class="container">
+      <ul class="nav nav-tabs py-2 mb-0">
+        <li class="nav-item">
+          <a class="nav-link active" href="art.html">Art</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="new-age.html">New Age</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="arcade.html">Arcade</a>
+        </li>
+      </ul>
+    </div>
+  </div>
 
   <!-- HERO BANNER -->
-  <section class="container mb-4">
+  <section class="container my-4">
     <div class="card border-0 text-white">
       <img src="art-gallery.png" class="card-img" alt="Art Gallery Banner">
-      <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center text-center"
-           style="background: linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75));">
-        <h1 class="display-4 fw-bold mb-2">Art Gallery</h1>
-        <p class="lead mb-0">Original pieces from the Magic Moon Studio.</p>
+      <div class="card-img-overlay hero-overlay d-flex flex-column justify-content-center align-items-center text-center">
+        <h1 class="display-5 fw-bold mb-2">Art Gallery</h1>
+        <p class="lead mb-0">
+          Original pieces and prints from your studio collection.
+        </p>
       </div>
     </div>
   </section>
@@ -67,53 +203,65 @@
 
       <!-- Intro text -->
       <div class="col-12 col-lg-5">
-        <h2 class="mb-3">Featured Collection</h2>
+        <h2 class="section-title">Featured Collection</h2>
         <p class="text-muted">
-          This is the beginning of your art collection page. As you create and photograph new pieces,
-          you can add them here with prices, sizes, and descriptions. For now, this section highlights
-          a single featured artwork as a starting point.
+          This page showcases your artwork as you build your collection. As you create and photograph
+          new pieces, add them here with titles, sizes, mediums, and pricing.
         </p>
         <p class="text-muted">
-          When you’re ready, you can duplicate the card on the right and swap in new images, titles,
-          and prices for each new painting or print.
+          The featured piece on the right is a starting point. You can duplicate its card below
+          for each new painting or print you want to list for sale.
         </p>
       </div>
 
       <!-- Featured art card (hooks into cart logic) -->
       <div class="col-12 col-lg-7">
-        <div class="card h-100 shadow-sm">
+        <div class="card art-card h-100">
           <img src="art-gallery.png" class="card-img-top" alt="Featured Artwork">
-
           <div class="card-body d-flex flex-column">
             <h5 class="card-title mb-1">Featured Artwork</h5>
-            <p class="text-muted small mb-2">Original artwork</p>
-
+            <p class="text-muted small mb-2">Original artwork · 16" × 20"</p>
             <p class="fw-bold mb-2">$120.00</p>
 
             <p class="small flex-grow-1">
-              Placeholder description: This piece represents emotion, story, and healing through color and form.
-              Replace this text with the real story and meaning behind the artwork.
+              Placeholder description: This piece represents emotion, story, and movement through color and form.
+              Replace this text with the true story, medium, and details of your artwork.
             </p>
 
-            <!-- Quantity / Add to cart controls (aligned with your app.js pattern) -->
+            <!-- Quantity / Add to cart controls -->
             <div class="mt-3 d-flex flex-column flex-sm-row gap-2 align-items-start align-items-sm-center">
-              <!-- If your app.js uses plus/minus buttons, this matches that pattern -->
-              <div class="btn-group" role="group"
-                   aria-label="Featured Artwork quantity controls"
-                   data-product-id="featuredArt">
-                <button title="Remove Item" type="button" class="btn btn-outline-danger btn-cart-minus">
+              <div
+                class="btn-group"
+                role="group"
+                aria-label="Featured Artwork quantity controls"
+                data-product-id="featuredArt"
+              >
+                <button
+                  title="Remove Item"
+                  type="button"
+                  class="btn btn-outline-danger btn-cart-minus"
+                >
                   <i class="bi bi-cart-dash"></i>
                 </button>
-                <button id="qty-featuredArt" type="button" class="btn btn-outline-secondary" disabled>
+                <button
+                  id="qty-featuredArt"
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  disabled
+                >
                   0
                 </button>
-                <button title="Add Item" type="button" class="btn btn-outline-success btn-cart-plus">
+                <button
+                  title="Add Item"
+                  type="button"
+                  class="btn btn-outline-success btn-cart-plus"
+                >
                   <i class="bi bi-cart-plus"></i>
                 </button>
               </div>
 
               <small class="text-muted">
-                Click the green cart button to add this piece to your cart.
+                Use the green cart button to add this piece to your cart.
               </small>
             </div>
           </div>
@@ -123,30 +271,126 @@
     </div>
   </section>
 
-  <!-- FUTURE GRID (optional placeholder, easy to expand later) -->
+  <!-- GALLERY GRID -->
   <section class="container mb-5">
-    <h3 class="mb-4">More Art Coming Soon</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="section-title mb-0">Gallery</h3>
+      <span class="small text-muted">More pieces can be added here as your collection grows.</span>
+    </div>
+
     <div class="row g-4">
+      <!-- Art Piece 1 -->
       <div class="col-12 col-sm-6 col-lg-4">
-        <div class="card h-100 border-0 bg-body-secondary text-center d-flex flex-column justify-content-center">
-          <div class="card-body">
-            <p class="mb-1 fw-semibold">New Piece #1</p>
-            <p class="text-muted small mb-0">Add a new image and details here when it’s ready.</p>
+        <div class="card art-card h-100">
+          <img src="bottle-4.jpg" class="card-img-top" alt="Artwork 1">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">Artwork Title #1</h5>
+            <p class="text-muted small mb-2">Original canvas · placeholder</p>
+            <p class="fw-bold mb-2">$80.00</p>
+            <p class="small flex-grow-1">
+              Replace this with details about the piece, such as medium, size, and inspiration.
+            </p>
+            <div class="mt-2">
+              <div
+                class="btn-group"
+                role="group"
+                aria-label="Artwork 1 quantity controls"
+                data-product-id="art1"
+              >
+                <button
+                  title="Remove Item"
+                  type="button"
+                  class="btn btn-outline-danger btn-cart-minus"
+                >
+                  <i class="bi bi-cart-dash"></i>
+                </button>
+                <button
+                  id="qty-art1"
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  disabled
+                >
+                  0
+                </button>
+                <button
+                  title="Add Item"
+                  type="button"
+                  class="btn btn-outline-success btn-cart-plus"
+                >
+                  <i class="bi bi-cart-plus"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Art Piece 2 -->
       <div class="col-12 col-sm-6 col-lg-4">
-        <div class="card h-100 border-0 bg-body-secondary text-center d-flex flex-column justify-content-center">
-          <div class="card-body">
-            <p class="mb-1 fw-semibold">New Piece #2</p>
-            <p class="text-muted small mb-0">Duplicate this card and connect it to cart logic later.</p>
+        <div class="card art-card h-100">
+          <img src="art-gallery.png" class="card-img-top" alt="Artwork 2">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">Artwork Title #2</h5>
+            <p class="text-muted small mb-2">Print · placeholder</p>
+            <p class="fw-bold mb-2">$40.00</p>
+            <p class="small flex-grow-1">
+              Use this slot to showcase a print or smaller piece with its description.
+            </p>
+            <div class="mt-2">
+              <div
+                class="btn-group"
+                role="group"
+                aria-label="Artwork 2 quantity controls"
+                data-product-id="art2"
+              >
+                <button
+                  title="Remove Item"
+                  type="button"
+                  class="btn btn-outline-danger btn-cart-minus"
+                >
+                  <i class="bi bi-cart-dash"></i>
+                </button>
+                <button
+                  id="qty-art2"
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  disabled
+                >
+                  0
+                </button>
+                <button
+                  title="Add Item"
+                  type="button"
+                  class="btn btn-outline-success btn-cart-plus"
+                >
+                  <i class="bi bi-cart-plus"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Art Piece 3 placeholder -->
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card h-100 border-0 bg-body-secondary text-center d-flex flex-column justify-content-center">
+          <div class="card-body">
+            <p class="mb-1 fw-semibold">Future Piece</p>
+            <p class="text-muted small mb-2">
+              Add a new artwork card here once you have another photo and details.
+            </p>
+            <p class="text-muted small mb-0">
+              Duplicate one of the cards above and connect it to your cart logic using a new
+              <code>data-product-id</code>.
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
-  <!-- Dark / light theme sync (same pattern as index) -->
+  <!-- Dark / light theme sync -->
   <script>
     (function () {
       const prefersDark = window.matchMedia &&
@@ -155,17 +399,28 @@
     })();
   </script>
 
-  <!-- Your main JS (needed!) -->
+  <!-- Your main JS (needed) -->
   <script src="app.js" type="module"></script>
 
-  <!-- Optional: Cart Toast (only if app.js expects this element) -->
+  <!-- Cart Toast (for app.js) -->
   <div class="toast position-fixed bottom-0 end-0 p-3">
-    <div id="cartToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div
+      id="cartToast"
+      class="toast align-items-center text-bg-success border-0"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
       <div class="d-flex">
         <div class="toast-body">
           Item updated in cart.
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close">
+        </button>
       </div>
     </div>
   </div>
