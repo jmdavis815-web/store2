@@ -120,7 +120,7 @@
 <body>
 
   <!-- NavBar -->
-  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+  <nav class="navbar navbar-expand bg-body-tertiary sticky-top">
     <div class="container-fluid px-3 px-md-4">
 
       <a title="Home" href="index.html" class="me-2">
@@ -128,28 +128,18 @@
       </a>
 
       <a class="navbar-brand me-3" href="index.html">
-        <span>Store</span> Name
+        <span>Dot</span>Mart
       </a>
 
-      <button
-        title="Main Menu"
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#mainNavbar"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
       <div class="collapse navbar-collapse" id="mainNavbar">
-        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-2">
+        <div class="ms-auto d-flex flex-row align-items-md-center gap-3">
           <form class="searchBar d-flex" role="search" action="search.html" method="GET">
             <input
               id="searchInput"
               name="q"
               class="form-control me-2"
               type="search"
-              placeholder="Search products"
+              placeholder="Search"
               aria-label="Search"
             />
             <button
@@ -161,6 +151,22 @@
               <i class="bi bi-search"></i>
             </button>
           </form>
+
+          <!-- 🛒 Cart summary added here -->
+          <div class="cart-summary text-center">
+            <a href="cart.html" class="text-decoration-none position-relative" title="View cart">
+              <i class="bi bi-cart4 fs-5 cart-icon">
+                <span
+                  id="cartBadge"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                ></span>
+              </i>
+            </a>
+            <div class="small text-secondary mt-1">
+              <span id="cartTotal" class="text-center">$0.00</span>
+            </div>
+          </div>
+          <!-- /Cart summary -->
         </div>
       </div>
 
@@ -178,7 +184,7 @@
           <a class="nav-link" href="new-age.html">New Age</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="arcade.html">Arcade</a>
+          <a class="nav-link" href="arcade.html">Candles</a>
         </li>
       </ul>
     </div>

@@ -120,7 +120,7 @@
 <body>
 
   <!-- NavBar -->
-  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+  <nav class="navbar navbar-expand bg-body-tertiary sticky-top">
     <div class="container-fluid px-3 px-md-4">
 
       <a title="Home" href="index.html" class="me-2">
@@ -128,28 +128,18 @@
       </a>
 
       <a class="navbar-brand me-3" href="index.html">
-        <span>Store</span> Name
+        <span>Dot</span>Mart
       </a>
 
-      <button
-      title="Main Menu"
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#mainNavbar"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
       <div class="collapse navbar-collapse" id="mainNavbar">
-        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-2">
+        <div class="ms-auto d-flex flex-row align-items-md-center gap-3">
           <form class="searchBar d-flex" role="search" action="search.html" method="GET">
             <input
               id="searchInput"
               name="q"
               class="form-control me-2"
               type="search"
-              placeholder="Search products"
+              placeholder="Search"
               aria-label="Search"
             />
             <button
@@ -161,6 +151,22 @@
               <i class="bi bi-search"></i>
             </button>
           </form>
+
+          <!-- 🛒 Cart summary added here -->
+          <div class="cart-summary text-center">
+            <a href="cart.html" class="text-decoration-none position-relative" title="View cart">
+              <i class="bi bi-cart4 fs-5 cart-icon">
+                <span
+                  id="cartBadge"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                ></span>
+              </i>
+            </a>
+            <div class="small text-secondary mt-1">
+              <span id="cartTotal" class="text-center">$0.00</span>
+            </div>
+          </div>
+          <!-- /Cart summary -->
         </div>
       </div>
 
@@ -178,16 +184,16 @@
           <a class="nav-link active" href="new-age.html">New Age</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="arcade.html">Arcade</a>
+          <a class="nav-link" href="arcade.html">Candles</a>
         </li>
       </ul>
     </div>
   </div>
 
   <!-- HERO BANNER -->
-  <section class="container my-4">
+  <section class="container my-4 d-md-none">
     <div class="card border-0 text-white">
-      <img src="new-age.png" class="card-img" alt="New Age Banner">
+      <img src="new-age.png" class="card-img w-100" alt="New Age Banner">
       <div class="card-img-overlay hero-overlay d-flex flex-column justify-content-center align-items-center text-center">
         <h1 class="display-5 fw-bold mb-2">New Age & Reiki</h1>
         <p class="lead mb-0">
@@ -210,8 +216,9 @@
           them here with clear descriptions and pricing.
         </p>
         <p class="text-muted">
-          Start with your signature pieces below, then duplicate their cards as your line grows.
-        </p>
+          Each product card includes quantity controls that connect directly to your cart,
+          making it easy for customers to add what they need. Customize the details to
+          reflect the unique qualities of each item.
       </div>
 
       <!-- Featured products -->

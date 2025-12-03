@@ -37,7 +37,7 @@ const PRODUCT_DATA = {
   chakraWater: {
     id: "chakraWater",
     name: "Chakra Water",
-    price: 24.99,
+    price: 0.01,
     description: "Reiki infused water",
     image: "chakra-water.png",
     url: "chakra-water.html",
@@ -59,14 +59,7 @@ const PRODUCT_DATA = {
 //  INVENTORY (Firestore)
 // =======================
 
-let INVENTORY = {};
-
-// Load defaults from PRODUCT_DATA
-for (const [id, product] of Object.entries(PRODUCT_DATA)) {
-  if (typeof product.stock === "number") {
-    INVENTORY[id] = product.stock;
-  }
-}
+let INVENTORY = {}; // Firestore is the source of truth
 
 async function loadInventoryFromDB() {
   try {
@@ -74,9 +67,40 @@ async function loadInventoryFromDB() {
     const snap = await getDoc(invRef);
 
     if (snap.exists()) {
-      Object.assign(INVENTORY, snap.data());
+      const data = snap.data() || {};
+      console.log("Inventory from Firestore:", data);
+
+      // Clear current INVENTORY and rebuild from Firestore + defaults
+      Object.keys(INVENTORY).forEach((k) => delete INVENTORY[k]);
+
+      // For every product we know about, prefer Firestore if it's a number;
+      // otherwise fall back to PRODUCT_DATA.stock or 0.
+      for (const [id, product] of Object.entries(PRODUCT_DATA)) {
+        const fsVal = data[id];
+        if (typeof fsVal === "number") {
+          INVENTORY[id] = fsVal;
+        } else if (typeof product.stock === "number") {
+          INVENTORY[id] = product.stock;
+        } else {
+          INVENTORY[id] = 0;
+        }
+      }
+
+      // Also keep any extra items present only in Firestore
+      for (const [id, val] of Object.entries(data)) {
+        if (!(id in INVENTORY)) {
+          INVENTORY[id] = typeof val === "number" ? val : 0;
+        }
+      }
     } else {
+      // No Firestore doc yet: seed from PRODUCT_DATA
+      Object.keys(INVENTORY).forEach((k) => delete INVENTORY[k]);
+      for (const [id, product] of Object.entries(PRODUCT_DATA)) {
+        INVENTORY[id] =
+          typeof product.stock === "number" ? product.stock : 0;
+      }
       await setDoc(invRef, INVENTORY);
+      console.log("Seeded Firestore inventory with defaults:", INVENTORY);
     }
 
     updateStockDisplays();
@@ -145,8 +169,6 @@ async function logPageView() {
     console.error("Error logging page view:", err);
   }
 }
-
-// ... everything you already have above stays the same ...
 
 // =======================
 //  GLOBAL EXPORTS (existing)
@@ -258,6 +280,25 @@ function changeQty(id, delta) {
 }
 
 // =======================
+//  ORDER LOGGING (for admin dashboard)
+// =======================
+
+async function logSuccessfulTransaction(orderData) {
+  try {
+    // orderData will contain totals, items, payer info, etc.
+    await addDoc(collection(db, "orders"), {
+      ...orderData,
+      createdAt: serverTimestamp()
+    });
+  } catch (err) {
+    console.error("Error logging successful transaction:", err);
+  }
+}
+
+// expose for cart.js
+window.logSuccessfulTransaction = logSuccessfulTransaction;
+
+// =======================
 //  DOM WIRING
 // =======================
 
@@ -294,4 +335,4 @@ window.getCartTotal = getCartTotal;
 window.updateCartSummary = updateCartSummary;
 window.updateDisplayedQuantities = updateDisplayedQuantities;
 window.changeQty = changeQty;
-
+window.logSuccessfulTransaction = logSuccessfulTransaction;

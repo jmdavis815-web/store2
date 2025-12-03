@@ -66,9 +66,6 @@
                 ></span>
               </i>
             </a>
-            <div class="small text-secondary mt-1">
-              <span id="cartTotal" class="text-center">$0.00</span>
-            </div>
           </div>
           <!-- /Cart summary -->
         </div>
@@ -120,27 +117,42 @@
           <div class="card-body">
             <h5 class="card-title mb-3">Order Summary</h5>
 
-            <div class="d-flex justify-content-between mb-2">
-  <span>Subtotal</span>
-  <strong id="cartSubtotal">$0.00</strong>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <strong id="cartSubtotal">$0.00</strong>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span>Tax (8%)</span>
+            <span id="cartTax">$0.00</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span>Shipping &amp; Handling</span>
+            <span id="cartShipping">$0.00</span>
+          </div>
+
+  <hr>
+
+  <div class="d-flex justify-content-between mb-3">
+    <span class="fw-semibold">Total</span>
+    <span class="fw-bold" id="cartTotal">$0.00</span>
+  </div>
+
+  <div class="d-grid gap-2">
+    <!-- PayPal buttons will render here -->
+    <div id="paypal-button-container" class="mb-2"></div>
+
+    <button id="clearCartBtn" class="btn btn-outline-danger" type="button">
+      Clear Cart
+    </button>
+  </div>
+
+  <small class="d-block mt-3 text-muted">
+    Note: This is a simple cart view. Final payment happens through your secure checkout links.
+  </small>
 </div>
 
-<div class="d-flex justify-content-between mb-2">
-  <span>Tax (8%)</span>
-  <span id="cartTax">$0.00</span>
-</div>
-
-<div class="d-flex justify-content-between mb-2">
-  <span>Shipping & Handling</span>
-  <span id="cartShipping">$8.99</span>
-</div>
-
-<hr>
-
-<div class="d-flex justify-content-between mb-3">
-  <span class="fw-semibold">Total</span>
-  <span class="fw-bold" id="cartTotal">$0.00</span>
-</div>
 
 
             <hr>

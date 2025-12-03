@@ -76,20 +76,94 @@
         </div>
       </div>
 
+      <!-- ========================= -->
+      <!--     INVENTORY MANAGEMENT  -->
+      <!-- ========================= -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Inventory Management</h5>
+              <p class="text-muted small">
+                Adjust stock levels for each product. Changes are saved to Firestore.
+              </p>
+
+              <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col" style="width: 120px;">ID</th>
+                      <th scope="col" style="width: 120px;">Current Stock</th>
+                      <th scope="col" style="width: 210px;">Adjust</th>
+                    </tr>
+                  </thead>
+                  <tbody id="inventoryTableBody">
+                    <!-- Filled by JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <small class="d-block mt-2 text-muted">
+                Tip: Use the minus/plus buttons to quickly adjust stock up or down.
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================= -->
+      <!--   RECENT TRANSACTIONS     -->
+      <!-- ========================= -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Recent Transactions</h5>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th scope="col">Date</th>
+                      <th scope="col">Order ID</th>
+                      <th scope="col">Customer</th>
+                      <th scope="col" class="text-end">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ordersTableBody">
+                    <tr>
+                      <td colspan="4" class="text-muted small">
+                        No transactions yet.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <small class="text-muted d-block mt-2">
+                Showing the 20 most recent successful checkouts.
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <hr class="my-5" />
 
       <a href="index.html" class="btn btn-secondary mt-4">Back to Store</a>
       <button class="btn btn-danger mt-4" onclick="adminLogout()">Logout</button>
     </div>
 
-    <!-- ADMIN PAGE SCRIPT: VIEWS COUNTER + GRAPH ONLY -->
+    <!-- ADMIN PAGE SCRIPT: VIEWS COUNTER + GRAPH + INVENTORY + ORDERS -->
     <script type="module">
       import {
         getFirestore,
         doc,
         onSnapshot,
         collection,
-        getDocs
+        getDocs,
+        query,
+        orderBy,
+        limit
       } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
       // Use the default Firebase app (initialized in app.js)
@@ -213,6 +287,205 @@
       }
 
       loadViewsGraph();
+
+      /*****************************
+       *     INVENTORY TABLE       *
+       *****************************/
+      const inventoryTableBody = document.getElementById("inventoryTableBody");
+
+      function renderInventoryTable() {
+        if (!inventoryTableBody) return;
+        if (!window.PRODUCT_DATA || !window.INVENTORY) return;
+
+        inventoryTableBody.innerHTML = "";
+
+        Object.values(window.PRODUCT_DATA).forEach((product) => {
+          const id = product.id;
+          const name = product.name || id;
+          const stock = window.INVENTORY[id] ?? 0;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>
+              <div class="d-flex align-items-center">
+                ${
+                  product.image
+                    ? `<img src="${product.image}" alt="${name}" class="me-2 rounded" style="width:40px;height:40px;object-fit:cover;">`
+                    : ""
+                }
+                <div>
+                  <div class="fw-semibold">${name}</div>
+                  <small class="text-muted">${product.description || ""}</small>
+                </div>
+              </div>
+            </td>
+            <td><code>${id}</code></td>
+            <td>
+              <span id="admin-stock-${id}" class="fw-semibold">${stock}</span>
+            </td>
+            <td>
+              <div class="input-group input-group-sm" style="max-width: 220px;">
+                <button
+                  type="button"
+                  class="btn btn-outline-danger inv-minus"
+                  data-id="${id}"
+                  title="Decrease stock"
+                >
+                  <i class="bi bi-dash"></i>
+                </button>
+                <input
+                  type="number"
+                  class="form-control text-center inv-input"
+                  data-id="${id}"
+                  min="0"
+                  value="${stock}"
+                />
+                <button
+                  type="button"
+                  class="btn btn-outline-success inv-plus"
+                  data-id="${id}"
+                  title="Increase stock"
+                >
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
+            </td>
+          `;
+          inventoryTableBody.appendChild(tr);
+        });
+      }
+
+      // Handle clicks on + / - buttons
+      if (inventoryTableBody) {
+        inventoryTableBody.addEventListener("click", (event) => {
+          const minusBtn = event.target.closest(".inv-minus");
+          const plusBtn  = event.target.closest(".inv-plus");
+          if (!minusBtn && !plusBtn) return;
+
+          const id = (minusBtn || plusBtn).dataset.id;
+          if (!id) return;
+
+          if (!window.INVENTORY) window.INVENTORY = {};
+          let current = Number(window.INVENTORY[id] ?? 0);
+
+          if (plusBtn) {
+            current++;
+          } else if (minusBtn) {
+            current = Math.max(0, current - 1);
+          }
+
+          window.INVENTORY[id] = current;
+
+          // Save to Firestore if helper exists
+          if (typeof window.saveInventory === "function") {
+            window.saveInventory();
+          }
+
+          // Update row display immediately
+          const span = document.getElementById("admin-stock-" + id);
+          const input = inventoryTableBody.querySelector(
+            'input.inv-input[data-id="' + id + '"]'
+          );
+          if (span) span.textContent = current;
+          if (input) input.value = current;
+        });
+
+        // Handle manual input change
+        inventoryTableBody.addEventListener("change", (event) => {
+          const input = event.target.closest(".inv-input");
+          if (!input) return;
+
+          const id = input.dataset.id;
+          if (!id) return;
+
+          let value = Number(input.value);
+          if (isNaN(value) || value < 0) value = 0;
+
+          if (!window.INVENTORY) window.INVENTORY = {};
+          window.INVENTORY[id] = value;
+
+          if (typeof window.saveInventory === "function") {
+            window.saveInventory();
+          }
+
+          const span = document.getElementById("admin-stock-" + id);
+          if (span) span.textContent = value;
+        });
+      }
+
+      // Initial render (using whatever INVENTORY app.js has so far)
+      renderInventoryTable();
+
+      // When app.js updates stock displays, also refresh our table
+      if (typeof window.updateStockDisplays === "function") {
+        const originalUpdate = window.updateStockDisplays;
+        window.updateStockDisplays = function (...args) {
+          originalUpdate.apply(this, args);
+          renderInventoryTable();
+        };
+      }
+
+      /*****************************
+       *   RECENT TRANSACTIONS     *
+       *****************************/
+      const ordersTableBody = document.getElementById("ordersTableBody");
+
+      function renderOrdersTable(snapshot) {
+        if (!ordersTableBody) return;
+
+        if (snapshot.empty) {
+          ordersTableBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-muted small">
+                No transactions yet.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        let html = "";
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data() || {};
+          const date = data.createdAt?.toDate
+            ? data.createdAt.toDate()
+            : null;
+
+          const dateStr = date
+            ? date.toLocaleString()
+            : "—";
+
+          const total = typeof data.total === "number"
+            ? `$${data.total.toFixed(2)}`
+            : "$0.00";
+
+          const name = (data.payerName || "").trim() || "Unknown";
+
+          html += `
+            <tr>
+              <td>${dateStr}</td>
+              <td>${data.orderId || docSnap.id}</td>
+              <td>${name}</td>
+              <td class="text-end">${total}</td>
+            </tr>
+          `;
+        });
+
+        ordersTableBody.innerHTML = html;
+      }
+
+      // Listen to the 20 most recent orders
+      const ordersRef = collection(db, "orders");
+      const ordersQuery = query(
+        ordersRef,
+        orderBy("createdAt", "desc"),
+        limit(20)
+      );
+
+      onSnapshot(ordersQuery, (snapshot) => {
+        renderOrdersTable(snapshot);
+      });
     </script>
   </body>
 </html>
