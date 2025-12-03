@@ -69,34 +69,21 @@
   </style>
 </head>
 <body>
-
-  <!-- ===================== -->
-  <!--     NAVBAR / HEADER   -->
-  <!-- ===================== -->
-  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mb-3">
+  <!-- NavBar -->
+  <nav class="navbar navbar-expand bg-body-tertiary sticky-top">
     <div class="container-fluid px-3 px-md-4">
 
       <a title="Home" href="index.html" class="me-2">
-        <i class="navBtn bi bi-house-door fs-5"></i>
+        <i class="navBtn bi bi-house-door-fill fs-5"></i>
       </a>
 
       <a class="navbar-brand me-3" href="index.html">
-        <span>Store</span> Name
+        <span>Dot</span>Mart
       </a>
 
-      <button
-        title="Main Menu"
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#mainNavbar"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
       <div class="collapse navbar-collapse" id="mainNavbar">
-        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-3">
-          <form class="searchBar d-flex mt-3 mt-md-0" role="search" action="search.html" method="GET">
+        <div class="ms-auto d-flex flex-row align-items-md-center gap-3">
+          <form class="searchBar d-flex" role="search" action="search.html" method="GET">
             <input
               id="searchInput"
               name="q"
@@ -114,11 +101,28 @@
               <i class="bi bi-search"></i>
             </button>
           </form>
+
+          <!-- 🛒 Cart summary added here -->
+          <div class="cart-summary text-end">
+            <a href="cart.html" class="text-decoration-none position-relative" title="View cart">
+              <i class="bi bi-cart4 fs-5 cart-icon">
+                <span
+                  id="cartBadge"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                ></span>
+              </i>
+            </a>
+            <div class="small text-secondary mt-1">
+              <span id="cartTotal">$0.00</span>
+            </div>
+          </div>
+          <!-- /Cart summary -->
         </div>
       </div>
 
     </div>
   </nav>
+  
 
   <!-- ===================== -->
   <!--     MAIN CONTENT      -->
@@ -127,15 +131,64 @@
     <div class="row g-4">
       <!-- LEFT: Product Image -->
       <div class="col-12 col-md-6">
-        <div class="card product-image-card h-100 shadow-sm">
-          <img
-            src="chakra-water.png"
-            class="card-img-top"
-            alt="Chakra Water"
-          >
+        <div class="card product-image-card h-100 shadow-sm border-0">
+          <div id="carouselItems" class="carousel slide">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselItems" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselItems" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselItems" data-bs-slide-to="2" aria-label="Slide 3"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="chakra-water.png" class="d-block w-100 h-100" alt="Chakra Water Image 1">
+    </div>
+    <div class="carousel-item">
+      <img src="chakra-water.png" class="d-block w-100 h-100" alt="bottle">
+    </div>
+    <div class="carousel-item">
+      <img src="chakra-water.png" class="d-block w-100 h-100" alt="...">
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselItems" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselItems" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+        <div class="mt-auto d-flex justify-content-center">
+            <div class="btn-group btn-group-sm" role="group">
+            <button 
+              title="remove"
+              type="button" 
+              class="btn btn-outline-danger" 
+              onclick="changeQty('chakraWater', -1)">
+              <i class="bi bi-dash"></i>
+            </button>
+
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary" 
+              disabled 
+              id="qty-chakraWater">
+              0
+            </button>
+
+            <button 
+              title="add"
+              type="button" 
+              class="btn btn-outline-success" 
+              onclick="changeQty('chakraWater', 1)">
+              <i class="bi bi-plus"></i>
+            </button>
+            </div>
+            </div>
+          
         </div>
       </div>
-
       <!-- RIGHT: Product Details -->
       <div class="col-12 col-md-6">
         <div class="d-flex flex-column h-100">
@@ -213,12 +266,6 @@
 
           <!-- Action buttons -->
           <div class="mt-auto d-flex flex-wrap gap-2">
-            <a
-              href="https://buy.stripe.com/5kQbJ2cbifFW3DBedPbII01"
-              class="btn btn-outline-success"
-            >
-              Buy Now
-            </a>
             <a href="index.html" class="btn btn-outline-secondary">
               Back to Shop
             </a>
