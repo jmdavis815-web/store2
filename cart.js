@@ -54,7 +54,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const paypalContainer = document.getElementById("paypal-button-container");
 
     const TAX_RATE = 0.08;
-    const SHIPPING_FLAT = 8.99;
+    const SHIPPING_FLAT = 0.01;
 
     function calculateSubtotal() {
       const cart = getCart();
