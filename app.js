@@ -37,7 +37,7 @@ const PRODUCT_DATA = {
   chakraWater: {
     id: "chakraWater",
     name: "Chakra Water",
-    price: 0.01,
+    price: 0.01, // test price
     description: "Reiki infused water",
     image: "chakra-water.png",
     url: "chakra-water.html",
@@ -136,6 +136,50 @@ function updateStockDisplays() {
 }
 
 // =======================
+//  ORDERS + INVENTORY HELPERS
+// =======================
+
+async function logSuccessfulTransaction(orderData) {
+  try {
+    const ordersRef = collection(db, "orders");
+    await addDoc(ordersRef, {
+      ...orderData,
+      createdAt: serverTimestamp()
+    });
+    console.log("Order logged:", orderData.orderId || "(no orderId)");
+  } catch (err) {
+    console.error("Error logging successful transaction:", err);
+  }
+}
+
+/**
+ * Decrease inventory based on items in the cart.
+ * cartSnapshot is an object like { productId: qty, ... }
+ */
+async function updateInventoryAfterCheckout(cartSnapshot) {
+  try {
+    if (!cartSnapshot || typeof cartSnapshot !== "object") return;
+
+    // Adjust local INVENTORY object
+    Object.entries(cartSnapshot).forEach(([id, qty]) => {
+      const current = typeof INVENTORY[id] === "number" ? INVENTORY[id] : 0;
+      const newVal = Math.max(0, current - (qty || 0));
+      INVENTORY[id] = newVal;
+    });
+
+    // Save to Firestore
+    await saveInventory();
+
+    // Refresh "In stock" labels if present
+    updateStockDisplays();
+
+    console.log("Inventory updated after checkout", cartSnapshot);
+  } catch (err) {
+    console.error("Error updating inventory after checkout:", err);
+  }
+}
+
+// =======================
 //  VIEW TRACKING
 // =======================
 
@@ -169,15 +213,6 @@ async function logPageView() {
     console.error("Error logging page view:", err);
   }
 }
-
-// =======================
-//  GLOBAL EXPORTS (existing)
-// =======================
-window.PRODUCT_DATA = PRODUCT_DATA;
-window.INVENTORY = INVENTORY;
-window.saveInventory = saveInventory;
-window.updateStockDisplays = updateStockDisplays;
-window.logPageView = logPageView;
 
 // =======================
 //  CART UTILITIES
@@ -231,7 +266,7 @@ function updateCartSummary() {
 
   const badge   = document.getElementById("cartBadge");
   const totalEl = document.getElementById("cartTotal");
-  const countEl = document.getElementById("cartItemCount"); // optional, if you add it later
+  const countEl = document.getElementById("cartItemCount"); // optional
 
   if (badge) {
     badge.textContent = count > 0 ? count : "";
@@ -280,25 +315,6 @@ function changeQty(id, delta) {
 }
 
 // =======================
-//  ORDER LOGGING (for admin dashboard)
-// =======================
-
-async function logSuccessfulTransaction(orderData) {
-  try {
-    // orderData will contain totals, items, payer info, etc.
-    await addDoc(collection(db, "orders"), {
-      ...orderData,
-      createdAt: serverTimestamp()
-    });
-  } catch (err) {
-    console.error("Error logging successful transaction:", err);
-  }
-}
-
-// expose for cart.js
-window.logSuccessfulTransaction = logSuccessfulTransaction;
-
-// =======================
 //  DOM WIRING
 // =======================
 
@@ -335,4 +351,7 @@ window.getCartTotal = getCartTotal;
 window.updateCartSummary = updateCartSummary;
 window.updateDisplayedQuantities = updateDisplayedQuantities;
 window.changeQty = changeQty;
+
+// Orders + inventory helpers for cart.js and admin
 window.logSuccessfulTransaction = logSuccessfulTransaction;
+window.updateInventoryAfterCheckout = updateInventoryAfterCheckout;

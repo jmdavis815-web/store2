@@ -1,8 +1,7 @@
 window.addEventListener("DOMContentLoaded", () => {
   const CART_KEY = "magicMoonCart";
-
-  const TAX_RATE = 0.08;      // 8%
-  const SHIPPING_FLAT = 0.01; // flat shipping
+  const TAX_RATE = 0.08;      // 8% tax
+  const SHIPPING_FLAT = 8.99; // flat shipping when there are items
 
   function getCart() {
     try {
@@ -58,10 +57,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     let paypalButtons = null;
 
-    /**
-     * Calculate subtotal, tax, shipping, and total for a given cart object.
-     */
-    function calculateTotals(cart) {
+    function calculateTotals() {
+      const cart = getCart();
       let subtotal = 0;
 
       for (const [id, qty] of Object.entries(cart)) {
@@ -83,13 +80,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
       const cart = getCart();
       const hasItems = Object.values(cart).some((qty) => qty > 0);
+
+      // Clear previous buttons each time we re-render
       paypalContainer.innerHTML = "";
 
       if (!hasItems) return;
 
       paypalButtons = window.paypal.Buttons({
         createOrder: (data, actions) => {
-          const { total } = calculateTotals(getCart());
+          const { total } = calculateTotals();
           return actions.order.create({
             purchase_units: [
               {
@@ -102,11 +101,11 @@ window.addEventListener("DOMContentLoaded", () => {
         },
         onApprove: (data, actions) => {
           return actions.order.capture().then(async (details) => {
-            // Re-grab cart & totals at the moment of approval
-            const cart = getCart();
-            const { subtotal, tax, shipping, total } = calculateTotals(cart);
+            // Take a snapshot of the cart BEFORE clearing it
+            const cartSnapshot = getCart();
+            const { subtotal, tax, shipping, total } = calculateTotals();
 
-            const items = Object.entries(cart).map(([id, qty]) => {
+            const items = Object.entries(cartSnapshot).map(([id, qty]) => {
               const product = PRODUCT_DATA[id] || {};
               return {
                 id,
@@ -130,7 +129,7 @@ window.addEventListener("DOMContentLoaded", () => {
               items
             };
 
-            // Log successful transaction to Firestore (helper defined in app.js)
+            // 1) Log successful transaction to Firestore (for admin Recent Transactions)
             if (window.logSuccessfulTransaction) {
               try {
                 await window.logSuccessfulTransaction(orderData);
@@ -139,16 +138,20 @@ window.addEventListener("DOMContentLoaded", () => {
               }
             }
 
-            // If you later add inventory-update helper, you can call it here:
-            // if (window.updateInventoryAfterCheckout) {
-            //   await window.updateInventoryAfterCheckout(cart);
-            // }
+            // 2) Update inventory in Firestore based on items bought
+            if (window.updateInventoryAfterCheckout) {
+              try {
+                await window.updateInventoryAfterCheckout(cartSnapshot);
+              } catch (err) {
+                console.error("Error updating inventory after checkout:", err);
+              }
+            }
 
             alert(
               `Thank you, ${details.payer?.name?.given_name || "customer"}! Your payment is complete.`
             );
 
-            // Clear cart
+            // 3) Clear cart locally
             localStorage.removeItem(CART_KEY);
             updateBadge();
             renderCart();
@@ -173,9 +176,9 @@ window.addEventListener("DOMContentLoaded", () => {
         emptyCartState.classList.remove("d-none");
         summaryCard.classList.add("d-none");
         if (subtotalEl) subtotalEl.textContent = "$0.00";
-        if (taxEl)      taxEl.textContent      = "$0.00";
+        if (taxEl) taxEl.textContent = "$0.00";
         if (shippingEl) shippingEl.textContent = "$0.00";
-        if (totalEl)    totalEl.textContent    = "$0.00";
+        if (totalEl) totalEl.textContent = "$0.00";
         updateBadge();
         renderPayPalButtons(); // clears the button area
         return;
@@ -227,15 +230,14 @@ window.addEventListener("DOMContentLoaded", () => {
         cartTableBody.appendChild(tr);
       });
 
-      // Now compute totals from THIS cart
-      const totals = calculateTotals(cart);
-
+      const totals = calculateTotals();
       if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal.toFixed(2)}`;
-      if (taxEl)      taxEl.textContent      = `$${totals.tax.toFixed(2)}`;
-      if (shippingEl) shippingEl.textContent = totals.subtotal > 0
-        ? `$${totals.shipping.toFixed(2)}`
-        : "$0.00";
-      if (totalEl)    totalEl.textContent    = `$${totals.total.toFixed(2)}`;
+      if (taxEl) taxEl.textContent = `$${totals.tax.toFixed(2)}`;
+      if (shippingEl) {
+        shippingEl.textContent =
+          totals.subtotal > 0 ? `$${totals.shipping.toFixed(2)}` : "$0.00";
+      }
+      if (totalEl) totalEl.textContent = `$${totals.total.toFixed(2)}`;
 
       updateBadge();
       renderPayPalButtons();
@@ -278,4 +280,3 @@ window.addEventListener("DOMContentLoaded", () => {
     renderCart();
   });
 });
-
