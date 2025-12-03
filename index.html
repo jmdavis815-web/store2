@@ -255,9 +255,9 @@
             <small id="stock-chakraWater" class="text-muted d-block mb-2">
               Checking stock...
             </small>
+            
             <div class="mt-auto d-flex justify-content-center">
             <div class="btn-group btn-group-sm" role="group">
-
             <button 
               title="remove"
               type="button" 
@@ -281,7 +281,6 @@
               onclick="changeQty('chakraWater', 1)">
               <i class="bi bi-plus"></i>
             </button>
-
             </div>
             </div>
 
@@ -300,6 +299,38 @@
             <h5 class="card-title mb-1">Protection Candle</h5>
             <p class="text-muted mb-2">Hand-poured candle focused on protection.</p>
             <p class="fw-bold mb-0">$12.99</p>
+            <small id="stock-protectionCandle" class="text-muted d-block mb-2">
+              Checking stock...
+            </small>
+            
+            <div class="mt-auto d-flex justify-content-center">
+            <div class="btn-group btn-group-sm" role="group">
+            <button 
+              title="remove"
+              type="button" 
+              class="btn btn-outline-danger" 
+              onclick="changeQty('protectionCandle', -1)">
+              <i class="bi bi-dash"></i>
+            </button>
+
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary" 
+              disabled 
+              id="qty-protectionCandle">
+              0
+            </button>
+
+            <button 
+              title="add"
+              type="button" 
+              class="btn btn-outline-success" 
+              onclick="changeQty('protectionCandle', 1)">
+              <i class="bi bi-plus"></i>
+            </button>
+            </div>
+            </div>
+            
           </div>
         </div>
       </div>

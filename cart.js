@@ -48,16 +48,13 @@ window.addEventListener("DOMContentLoaded", () => {
     const emptyCartState  = document.getElementById("emptyCartState");
     const summaryCard     = document.getElementById("cartSummary");
     const subtotalEl      = document.getElementById("cartSubtotal");
+    const taxEl           = document.getElementById("cartTax");
+    const shippingEl      = document.getElementById("cartShipping");
     const totalEl         = document.getElementById("cartTotal");
-    const taxEl           = document.getElementById("cartTax");       // new (optional)
-    const shippingEl      = document.getElementById("cartShipping");  // new (optional)
     const paypalContainer = document.getElementById("paypal-button-container");
 
-    let paypalButtons = null;
-
-    // 8% tax + flat shipping
     const TAX_RATE = 0.08;
-    const SHIPPING = 0.01;
+    const SHIPPING_FLAT = 8.99;
 
     function calculateSubtotal() {
       const cart = getCart();
@@ -71,15 +68,6 @@ window.addEventListener("DOMContentLoaded", () => {
       return subtotal;
     }
 
-    function calculateTax(subtotal) {
-      return subtotal * TAX_RATE;
-    }
-
-    function calculateTotal(subtotal) {
-      const tax = calculateTax(subtotal);
-      return subtotal + tax + SHIPPING;
-    }
-
     function renderPayPalButtons() {
       if (!paypalContainer || !window.paypal) return;
 
@@ -89,52 +77,64 @@ window.addEventListener("DOMContentLoaded", () => {
 
       if (!hasItems) return;
 
-      paypalButtons = window.paypal.Buttons({
-        createOrder: (data, actions) => {
-          const subtotal = calculateSubtotal();
-          const tax      = calculateTax(subtotal);
-          const total    = calculateTotal(subtotal);
+      window.paypal
+        .Buttons({
+          createOrder: (data, actions) => {
+            const subtotal = calculateSubtotal();
+            const tax = subtotal * TAX_RATE;
+            const shipping = subtotal > 0 ? SHIPPING_FLAT : 0;
+            const total = (subtotal + tax + shipping).toFixed(2);
 
-          return actions.order.create({
-            purchase_units: [
-              {
-                amount: {
-                  currency_code: "USD",
-                  value: total.toFixed(2),
-                  breakdown: {
-                    item_total: {
-                      value: subtotal.toFixed(2),
-                      currency_code: "USD"
-                    },
-                    tax_total: {
-                      value: tax.toFixed(2),
-                      currency_code: "USD"
-                    },
-                    shipping: {
-                      value: SHIPPING.toFixed(2),
-                      currency_code: "USD"
-                    }
+            return actions.order.create({
+              purchase_units: [
+                {
+                  amount: {
+                    value: total
                   }
                 }
-              }
-            ]
-          });
-        },
-        onApprove: (data, actions) => {
-          return actions.order.capture().then((details) => {
-            alert(`Thank you, ${details.payer.name.given_name}! Your payment is complete.`);
-            localStorage.removeItem(CART_KEY);
-            updateBadge();
-            renderCart();
-          });
-        },
-        onError: (err) => {
-          console.error("PayPal error:", err);
-          alert("Something went wrong with PayPal. Please try again.");
-        }
-      });
+              ]
+            });
+          },
+          onApprove: (data, actions) => {
+            return actions.order.capture().then((details) => {
+              // 🔹 Update inventory in Firestore after successful payment
+              const cart = getCart();
+              if (window.INVENTORY && window.saveInventory) {
+                for (const [id, qty] of Object.entries(cart)) {
+                  if (window.INVENTORY[id] != null) {
+                    const current = Number(window.INVENTORY[id]) || 0;
+                    const newVal = current - (qty || 0);
+                    window.INVENTORY[id] = newVal > 0 ? newVal : 0;
+                  }
+                }
 
-      paypalButtons.render("#paypal-button-container");
+                // Save updated inventory document
+                try {
+                  window.saveInventory();
+                } catch (err) {
+                  console.error("Error saving updated inventory:", err);
+                }
+
+                // Refresh any "In stock" labels on page
+                if (typeof window.updateStockDisplays === "function") {
+                  window.updateStockDisplays();
+                }
+              }
+
+              alert(`Thank you, ${details.payer.name.given_name}! Your payment is complete.`);
+
+              // Clear cart after successful purchase
+              localStorage.removeItem(CART_KEY);
+              updateBadge();
+              renderCart();
+            });
+          },
+          onError: (err) => {
+            console.error("PayPal error:", err);
+            alert("Something went wrong with PayPal. Please try again.");
+          }
+        })
+        .render("#paypal-button-container");
     }
 
     function renderCart() {
@@ -148,17 +148,19 @@ window.addEventListener("DOMContentLoaded", () => {
         summaryCard.classList.add("d-none");
 
         if (subtotalEl) subtotalEl.textContent = "$0.00";
-        if (taxEl)      taxEl.textContent      = "$0.00";
+        if (taxEl) taxEl.textContent = "$0.00";
         if (shippingEl) shippingEl.textContent = "$0.00";
-        if (totalEl)    totalEl.textContent    = "$0.00";
+        if (totalEl) totalEl.textContent = "$0.00";
 
         updateBadge();
-        renderPayPalButtons(); // clears the button area
+        renderPayPalButtons(); // clears button area
         return;
       }
 
       emptyCartState.classList.add("d-none");
       summaryCard.classList.remove("d-none");
+
+      let subtotal = 0;
 
       entries.forEach(([id, qty]) => {
         const product = PRODUCT_DATA[id];
@@ -166,6 +168,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const price = Number(product.price || 0);
         const lineTotal = price * qty;
+        subtotal += lineTotal;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -203,15 +206,14 @@ window.addEventListener("DOMContentLoaded", () => {
         cartTableBody.appendChild(tr);
       });
 
-      // 🔢 Update summary with tax + shipping
-      const subtotal = calculateSubtotal();
-      const tax      = calculateTax(subtotal);
-      const total    = calculateTotal(subtotal);
+      const tax = subtotal * TAX_RATE;
+      const shipping = subtotal > 0 ? SHIPPING_FLAT : 0;
+      const total = subtotal + tax + shipping;
 
       if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
-      if (taxEl)      taxEl.textContent      = `$${tax.toFixed(2)}`;
-      if (shippingEl) shippingEl.textContent = `$${SHIPPING.toFixed(2)}`;
-      if (totalEl)    totalEl.textContent    = `$${total.toFixed(2)}`;
+      if (taxEl) taxEl.textContent = `$${tax.toFixed(2)}`;
+      if (shippingEl) shippingEl.textContent = `$${shipping.toFixed(2)}`;
+      if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
 
       updateBadge();
       renderPayPalButtons();
