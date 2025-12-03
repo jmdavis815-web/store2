@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title>Store</title>
+  <title>DotMart · Home</title>
 
   <link href="style.css" rel="stylesheet">
 
@@ -12,138 +12,16 @@
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
     rel="stylesheet"
-    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
     crossorigin="anonymous"
   >
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous">
   </script>
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
   >
-
-  <style>
-    /* Page-level tweaks for a more modern look */
-    body {
-      background-color: var(--bs-body-bg);
-    }
-
-    .navbar {
-      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-size: 0.95rem;
-    }
-
-    .navbar-brand span {
-      color: var(--bs-primary);
-    }
-
-    .searchBar {
-      max-width: 340px;
-      width: 100%;
-    }
-
-    @media (max-width: 768px) {
-      .searchBar {
-        margin-top: 0.75rem !important;
-        width: 100%;
-      }
-    }
-
-    .hero-card {
-      border-radius: 1.5rem;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      box-shadow: 0 20px 55px rgba(15, 23, 42, 0.12);
-      padding: 1.75rem 1.75rem;
-    }
-
-    .hero-badge {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      font-weight: 600;
-    }
-
-    .section-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 0.75rem;
-    }
-
-    .category-card img,
-    .promo-card img {
-      object-fit: cover;
-      width: 100%;
-      height: 140px;
-    }
-
-    .category-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: flex-end;
-      padding: 0.75rem 1rem;
-      background: linear-gradient(to top, rgba(15, 23, 42, 0.7), transparent 60%);
-      color: #fff;
-      border-radius: 0.75rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    .product-card {
-      border-radius: 1rem;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-    }
-
-    .product-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 38px rgba(15, 23, 42, 0.16);
-      border-color: var(--bs-primary);
-    }
-
-    .product-card .card-img-top {
-      border-top-left-radius: 1rem;
-      border-top-right-radius: 1rem;
-    }
-
-    .nav-tabs {
-      border-bottom: none;
-    }
-
-    .nav-tabs .nav-link {
-      border: none;
-      border-radius: 999px;
-      padding-inline: 1.2rem;
-      color: var(--bs-secondary-color);
-      font-size: 0.9rem;
-    }
-
-    .nav-tabs .nav-link.active {
-      background-color: var(--bs-primary-bg-subtle);
-      color: var(--bs-primary);
-      font-weight: 600;
-    }
-
-    .nav-tabs-wrapper {
-      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-    }
-
-    .carousel-inner img {
-      border-radius: 1rem;
-      object-fit: cover;
-      width: 100%;
-      height: 240px;
-    }
-  </style>
 </head>
 <body>
 
@@ -156,7 +34,7 @@
       </a>
 
       <a class="navbar-brand me-3" href="index.html">
-        <span>Store</span> Name
+        <span>Dot</span>Mart
       </a>
 
       <button
@@ -170,7 +48,7 @@
       </button>
 
       <div class="collapse navbar-collapse" id="mainNavbar">
-        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-2">
+        <div class="ms-auto d-flex flex-column flex-md-row align-items-md-center gap-3">
           <form class="searchBar d-flex" role="search" action="search.html" method="GET">
             <input
               id="searchInput"
@@ -189,6 +67,22 @@
               <i class="bi bi-search"></i>
             </button>
           </form>
+
+          <!-- 🛒 Cart summary added here -->
+          <div class="cart-summary text-end">
+            <a href="cart.html" class="text-decoration-none position-relative" title="View cart">
+              <i class="bi bi-cart4 fs-5 cart-icon">
+                <span
+                  id="cartBadge"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                ></span>
+              </i>
+            </a>
+            <div class="small text-secondary mt-1">
+              <span id="cartTotal">$0.00</span>
+            </div>
+          </div>
+          <!-- /Cart summary -->
         </div>
       </div>
 
@@ -206,7 +100,7 @@
           <a class="nav-link" href="new-age.html">New Age</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="arcade.html">Arcade</a>
+          <a class="nav-link" href="arcade.html">Candles</a>
         </li>
       </ul>
     </div>
@@ -224,7 +118,7 @@
             Featured collection
           </div>
           <h1 class="h4 mb-2">
-            Welcome to <strong>Store Name</strong>
+            Welcome to <strong>DotMart</strong>
           </h1>
           <p class="text-secondary mb-3">
             Discover hand-crafted candles, chakra water, artwork, and more. 
@@ -283,8 +177,8 @@
           </div>
           <div class="col-6 col-lg-12">
             <div class="promo-card card border-0">
-              <a href="arcade.html">
-                <img src="arcade.png" alt="Arcade" class="card-img-top rounded-4">
+              <a href="#">
+                <img src="..." alt="Promo" class="card-img-top rounded-4">
               </a>
             </div>
           </div>
@@ -330,9 +224,9 @@
         </a>
       </div>
       <div class="col-12 col-md-4">
-        <a href="arcade.html" class="text-decoration-none">
+        <a href="#" class="text-decoration-none">
           <div class="category-card position-relative">
-            <img src="arcade.png" alt="Arcade" class="img-fluid rounded-3">
+            <img src="..." alt="#" class="img-fluid rounded-3">
             <div class="category-overlay">
               Arcade & Games
             </div>
@@ -358,6 +252,40 @@
             <h5 class="card-title mb-1">Chakra Water</h5>
             <p class="text-muted mb-2">Reiki-infused water for daily balance.</p>
             <p class="fw-bold mb-0">$24.99</p>
+            <small id="stock-chakraWater" class="text-muted d-block mb-2">
+              Checking stock...
+            </small>
+            <div class="mt-auto d-flex justify-content-center">
+            <div class="btn-group btn-group-sm" role="group">
+
+            <button 
+              title="remove"
+              type="button" 
+              class="btn btn-outline-danger" 
+              onclick="changeQty('chakraWater', -1)">
+              <i class="bi bi-dash"></i>
+            </button>
+
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary" 
+              disabled 
+              id="qty-chakraWater">
+              0
+            </button>
+
+            <button 
+              title="add"
+              type="button" 
+              class="btn btn-outline-success" 
+              onclick="changeQty('chakraWater', 1)">
+              <i class="bi bi-plus"></i>
+            </button>
+
+            </div>
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -406,6 +334,7 @@
 
   </div><!-- /.container -->
 
+  <!-- Main app logic (defines window.PRODUCT_DATA) -->
   <script type="module" src="app.js"></script>
 
   <!-- Auto light/dark based on system preference -->

@@ -37,7 +37,7 @@ const PRODUCT_DATA = {
   chakraWater: {
     id: "chakraWater",
     name: "Chakra Water",
-    price: 24.99,
+    price: 0.01,
     description: "Reiki infused water",
     image: "chakra-water.png",
     url: "chakra-water.html",
@@ -146,6 +146,117 @@ async function logPageView() {
   }
 }
 
+// ... everything you already have above stays the same ...
+
+// =======================
+//  GLOBAL EXPORTS (existing)
+// =======================
+window.PRODUCT_DATA = PRODUCT_DATA;
+window.INVENTORY = INVENTORY;
+window.saveInventory = saveInventory;
+window.updateStockDisplays = updateStockDisplays;
+window.logPageView = logPageView;
+
+// =======================
+//  CART UTILITIES
+// =======================
+
+const CART_KEY = "magicMoonCart"; // same key used by cart.html / cart.js
+
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || {};
+  } catch (e) {
+    console.error("Error reading cart from localStorage:", e);
+    return {};
+  }
+}
+
+function saveCart(cart) {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  } catch (e) {
+    console.error("Error saving cart to localStorage:", e);
+  }
+
+  // After any change, refresh UI
+  updateCartSummary();
+  updateDisplayedQuantities();
+}
+
+function getCartCount(cart) {
+  const c = cart || getCart();
+  return Object.values(c).reduce((sum, qty) => sum + (qty || 0), 0);
+}
+
+function getCartTotal(cart) {
+  const c = cart || getCart();
+  let total = 0;
+  for (const [id, qty] of Object.entries(c)) {
+    const product = PRODUCT_DATA[id];
+    if (!product) continue;
+    const price = Number(product.price || 0);
+    total += price * (qty || 0);
+  }
+  return total;
+}
+
+// Navbar badge + total
+function updateCartSummary() {
+  const cart  = getCart();
+  const count = getCartCount(cart);
+  const total = getCartTotal(cart);
+
+  const badge   = document.getElementById("cartBadge");
+  const totalEl = document.getElementById("cartTotal");
+  const countEl = document.getElementById("cartItemCount"); // optional, if you add it later
+
+  if (badge) {
+    badge.textContent = count > 0 ? count : "";
+  }
+  if (totalEl) {
+    totalEl.textContent = `$${total.toFixed(2)}`;
+  }
+  if (countEl) {
+    countEl.textContent = count === 1 ? "1 item" : `${count} items`;
+  }
+}
+
+// Per-product quantities (the middle button with id="qty-<id>")
+function updateDisplayedQuantities() {
+  const cart = getCart();
+
+  document.querySelectorAll("[id^='qty-']").forEach((el) => {
+    const id = el.id.replace("qty-", "");
+    const qty = cart[id] || 0;
+    el.textContent = qty;
+  });
+}
+
+// Toast when adding
+function showAddToast() {
+  const toastEl = document.getElementById("cartToast");
+  if (!toastEl || !window.bootstrap) return;
+  const toast = window.bootstrap.Toast.getOrCreateInstance(toastEl);
+  toast.show();
+}
+
+// Called by your plus/minus buttons
+function changeQty(id, delta) {
+  const cart = getCart();
+  cart[id] = (cart[id] || 0) + delta;
+
+  if (cart[id] <= 0) {
+    delete cart[id];
+  }
+
+  saveCart(cart);
+
+  if (delta > 0) {
+    showAddToast();
+  }
+}
+
 // =======================
 //  DOM WIRING
 // =======================
@@ -160,13 +271,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // Sync inventory from Firestore and update "In stock" labels
   loadInventoryFromDB();
   updateStockDisplays();
+
+  // Cart UI (navbar + qty buttons)
+  updateCartSummary();
+  updateDisplayedQuantities();
 });
 
 // =======================
 //  GLOBAL EXPORTS
 // =======================
+
 window.PRODUCT_DATA = PRODUCT_DATA;
 window.INVENTORY = INVENTORY;
 window.saveInventory = saveInventory;
 window.updateStockDisplays = updateStockDisplays;
 window.logPageView = logPageView;
+
+// Cart exports for inline HTML / other scripts
+window.getCart = getCart;
+window.getCartCount = getCartCount;
+window.getCartTotal = getCartTotal;
+window.updateCartSummary = updateCartSummary;
+window.updateDisplayedQuantities = updateDisplayedQuantities;
+window.changeQty = changeQty;
+
