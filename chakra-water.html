@@ -158,8 +158,30 @@
     <span class="visually-hidden">Next</span>
   </button>
 </div>
+          
+        </div>
+      </div>
+      <!-- RIGHT: Product Details -->
+      <div class="col-12 col-md-6">
+        <div class="d-flex flex-column h-100">
 
-        <div class="mt-auto d-flex justify-content-center">
+          <!-- Product Title -->
+          <h1 class="h3 mb-1">Chakra Water</h1>
+
+          <!-- Short tagline -->
+          <p class="text-muted mb-2">
+            Reiki-infused water created to support balance, grounding, and gentle alignment.
+          </p>
+
+          <!-- Price -->
+          <p class="fs-4 fw-bold mb-1">$24.99</p>
+
+          <!-- Live stock text (filled by JS) -->
+          <p id="stock-chakraWater" class="text-muted small mb-3">
+            <!-- JS fills this with "In stock: X" or "Out of stock" -->
+          </p>
+
+          <div class="mt-auto d-flex justify-content-start mb-3 d-md-none">
             <div class="btn-group btn-group-sm" role="group">
             <button 
               title="remove"
@@ -186,28 +208,6 @@
             </button>
             </div>
             </div>
-          
-        </div>
-      </div>
-      <!-- RIGHT: Product Details -->
-      <div class="col-12 col-md-6">
-        <div class="d-flex flex-column h-100">
-
-          <!-- Product Title -->
-          <h1 class="h3 mb-1">Chakra Water</h1>
-
-          <!-- Short tagline -->
-          <p class="text-muted mb-2">
-            Reiki-infused water created to support balance, grounding, and gentle alignment.
-          </p>
-
-          <!-- Price -->
-          <p class="fs-4 fw-bold mb-1">$24.99</p>
-
-          <!-- Live stock text (filled by JS) -->
-          <p id="stock-chakraWater" class="text-muted small mb-3">
-            <!-- JS fills this with "In stock: X" or "Out of stock" -->
-          </p>
 
           <hr>
 
@@ -260,9 +260,37 @@
             </div>
 
             <small class="d-block text-muted mt-2">
-              Use the green cart button to checkout.
+              Use the green and red buttons to adjust quantity, then click the cart button to checkout.
             </small>
           </div>
+
+          <div class="mt-auto d-md-flex justify-content-start mb-3 d-none">
+            <div class="btn-group btn-group-sm" role="group">
+            <button 
+              title="remove"
+              type="button" 
+              class="btn btn-outline-danger" 
+              onclick="changeQty('chakraWater', -1)">
+              <i class="bi bi-dash"></i>
+            </button>
+
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary" 
+              disabled 
+              id="qty-chakraWater">
+              0
+            </button>
+
+            <button 
+              title="add"
+              type="button" 
+              class="btn btn-outline-success" 
+              onclick="changeQty('chakraWater', 1)">
+              <i class="bi bi-plus"></i>
+            </button>
+            </div>
+            </div>
 
           <!-- Action buttons -->
           <div class="mt-auto d-flex flex-wrap gap-2">
