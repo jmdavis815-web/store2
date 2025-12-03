@@ -115,7 +115,7 @@ window.addEventListener("DOMContentLoaded", () => {
                   console.error("Error saving updated inventory:", err);
                 }
 
-                // Refresh any "In stock" labels on page
+                // Refresh any "In stock" labels on pages that use them
                 if (typeof window.updateStockDisplays === "function") {
                   window.updateStockDisplays();
                 }

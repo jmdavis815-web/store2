@@ -23,61 +23,57 @@
 </head>
 <body>
 
-  <!-- NAVBAR (copied from search.html for consistency) -->
-  <nav class="navbar navbar-expand bg-body-tertiary sticky-top mb-3 shadow-sm">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">
-        DotMart
+  <!-- NavBar -->
+  <nav class="navbar navbar-expand bg-body-tertiary sticky-top">
+    <div class="container-fluid px-3 px-md-4">
+
+      <a title="Home" href="index.html" class="me-2">
+        <i class="navBtn bi bi-house-door fs-5"></i>
       </a>
 
-      <button
-        title="Menu"
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasNavbar"
-        aria-controls="offcanvasNavbar"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <a class="navbar-brand me-3" href="index.html">
+        <span>Dot</span>Mart
+      </a>
 
-      <div
-        class="offcanvas offcanvas-end"
-        tabindex="-1"
-        id="offcanvasNavbar"
-        aria-labelledby="offcanvasNavbarLabel"
-      >
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Magic Moon Shop</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="offcanvas"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="offcanvas-body">
-          <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-            <li class="nav-item">
-              <a class="nav-link" href="index.html">Home</a>
-            </li>
-          </ul>
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <div class="ms-auto d-flex flex-row align-items-md-center gap-3">
+          <form class="searchBar d-flex" role="search" action="search.html" method="GET">
+            <input
+              id="searchInput"
+              name="q"
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button
+              id="searchBtn"
+              title="Search"
+              class="searchBtn btn btn-outline-primary"
+              type="submit"
+            >
+              <i class="bi bi-search"></i>
+            </button>
+          </form>
 
-          <!-- Cart icon / badge -->
-          <div class="d-flex">
-            <a href="cart.html" type="button" title="Cart">
-              <i class="cart bi bi-cart4 position-relative">
+          <!-- 🛒 Cart summary added here -->
+          <div class="cart-summary text-center">
+            <a href="cart.html" class="text-decoration-none position-relative" title="View cart">
+              <i class="bi bi-cart4 fs-5 cart-icon">
                 <span
                   id="cartBadge"
-                  class="top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                >
-                  <!-- Filled by JS -->
-                </span>
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                ></span>
               </i>
             </a>
+            <div class="small text-secondary mt-1">
+              <span id="cartTotal" class="text-center">$0.00</span>
+            </div>
           </div>
+          <!-- /Cart summary -->
         </div>
       </div>
+
     </div>
   </nav>
 
