@@ -37,7 +37,7 @@ const PRODUCT_DATA = {
   chakraWater: {
     id: "chakraWater",
     name: "Chakra Water",
-    price: 0.01,
+    price: 24.99,
     description: "Reiki infused water",
     image: "chakra-water.png",
     url: "chakra-water.html",
