@@ -70,11 +70,8 @@ async function loadInventoryFromDB() {
       const data = snap.data() || {};
       console.log("Inventory from Firestore:", data);
 
-      // Clear current INVENTORY and rebuild from Firestore + defaults
       Object.keys(INVENTORY).forEach((k) => delete INVENTORY[k]);
 
-      // For every product we know about, prefer Firestore if it's a number;
-      // otherwise fall back to PRODUCT_DATA.stock or 0.
       for (const [id, product] of Object.entries(PRODUCT_DATA)) {
         const fsVal = data[id];
         if (typeof fsVal === "number") {
@@ -86,14 +83,12 @@ async function loadInventoryFromDB() {
         }
       }
 
-      // Also keep any extra items present only in Firestore
       for (const [id, val] of Object.entries(data)) {
         if (!(id in INVENTORY)) {
           INVENTORY[id] = typeof val === "number" ? val : 0;
         }
       }
     } else {
-      // No Firestore doc yet: seed from PRODUCT_DATA
       Object.keys(INVENTORY).forEach((k) => delete INVENTORY[k]);
       for (const [id, product] of Object.entries(PRODUCT_DATA)) {
         INVENTORY[id] =
@@ -104,16 +99,26 @@ async function loadInventoryFromDB() {
     }
 
     updateStockDisplays();
+    // 🔔 tell any page (like admin) that inventory is ready
+    window.dispatchEvent(new Event("inventory-loaded"));
   } catch (err) {
     console.error("Error loading inventory:", err);
     updateStockDisplays();
+    // still fire the event so pages can at least show defaults
+    window.dispatchEvent(new Event("inventory-loaded"));
   }
 }
+
 
 async function saveInventory() {
   try {
     const invRef = doc(db, "store", "inventory");
-    await setDoc(invRef, INVENTORY);
+
+    // Always use the same object the admin page manipulates
+    const dataToSave = window.INVENTORY || INVENTORY;
+
+    await setDoc(invRef, dataToSave);
+    console.log("Inventory saved:", dataToSave);
   } catch (err) {
     console.error("Error saving inventory:", err);
   }

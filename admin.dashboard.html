@@ -355,6 +355,15 @@
         });
       }
 
+      // 🔔 Re-render when app.js finishes loading inventory from Firestore
+window.addEventListener("inventory-loaded", () => {
+  console.log("Admin: inventory-loaded event", window.INVENTORY);
+  renderInventoryTable();
+});
+
+// Optional: first attempt using whatever we have immediately
+renderInventoryTable();
+
       // Handle clicks on + / - buttons
       if (inventoryTableBody) {
         inventoryTableBody.addEventListener("click", (event) => {
