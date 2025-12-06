@@ -60,7 +60,16 @@ const PRODUCT_DATA = {
     image: "heart-painting.png",
     url: "heart-painting.html",
     stock: 1
-  }
+  },
+  crossPainting: {
+    id: "crossPainting",
+    name: "Cross Painting",
+    price: 119.99,
+    description: "Canvas painting of a cross.",
+    image: "cross-painting.png",
+    url: "cross-painting.html",
+    stock: 1
+  },
   // Add more products here...
 };
 
