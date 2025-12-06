@@ -51,6 +51,15 @@ const PRODUCT_DATA = {
     image: "protection-candle-img.png",
     url: "protection-candle.html",
     stock: 10
+  },
+  heartPainting: {
+    id: "heartPainting",
+    name: "Heart Painting",
+    price: 44.99,
+    description: "Canvas painting of a heart.",
+    image: "heart-painting.png",
+    url: "heart-painting.html",
+    stock: 1
   }
   // Add more products here...
 };
@@ -303,18 +312,50 @@ function showAddToast() {
   toast.show();
 }
 
+// Return how many of this product are actually available
+function getEffectiveStock(id) {
+  // Prefer live Firestore inventory if present
+  if (typeof INVENTORY[id] === "number") {
+    return INVENTORY[id];
+  }
+
+  // Fallback to the default in PRODUCT_DATA
+  const product = PRODUCT_DATA[id];
+  if (product && typeof product.stock === "number") {
+    return product.stock;
+  }
+
+  // If we don't know, don't block adding
+  return Infinity;
+}
+
 // Called by your plus/minus buttons
 function changeQty(id, delta) {
   const cart = getCart();
-  cart[id] = (cart[id] || 0) + delta;
+  const currentQty = cart[id] || 0;
+  const maxStock = getEffectiveStock(id);
 
-  if (cart[id] <= 0) {
+  // If we're trying to add and we're already at stock, block it
+  if (delta > 0 && currentQty >= maxStock) {
+    // Optional: show a message to the user
+    alert("You've added all we currently have in stock for this item.");
+    return;
+  }
+
+  let newQty = currentQty + delta;
+
+  // Don't allow negative or zero → remove from cart
+  if (newQty <= 0) {
     delete cart[id];
+  } else {
+    // Clamp to stock just in case
+    if (newQty > maxStock) newQty = maxStock;
+    cart[id] = newQty;
   }
 
   saveCart(cart);
 
-  if (delta > 0) {
+  if (delta > 0 && newQty > currentQty) {
     showAddToast();
   }
 }

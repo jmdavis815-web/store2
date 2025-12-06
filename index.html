@@ -228,6 +228,7 @@
     </div>
 
     <div class="row g-3">
+
       <!-- Chakra Water -->
       <div class="col-12 col-sm-6 col-lg-3">
         <div class="card product-card h-100 rounded-4">
@@ -312,6 +313,52 @@
               type="button" 
               class="btn btn-outline-success" 
               onclick="changeQty('protectionCandle', 1)">
+              <i class="bi bi-plus"></i>
+            </button>
+            </div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- Heart Painting -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card product-card h-100 rounded-4">
+          <a href="heart-painting.html">
+            <img src="heart-painting.png" class="card-img-top item-img" alt="Protection Candle">
+          </a>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-1">Heart Painting</h5>
+            <p class="text-muted mb-2">Canvas painting of a heart.</p>
+            <p class="fw-bold mb-0">$44.99</p>
+            <small id="stock-heartPainting" class="text-muted d-block mb-2">
+              Checking stock...
+            </small>
+            
+            <div class="mt-auto d-flex justify-content-center">
+            <div class="btn-group btn-group-sm" role="group">
+            <button 
+              title="remove"
+              type="button" 
+              class="btn btn-outline-danger" 
+              onclick="changeQty('heartPainting', -1)">
+              <i class="bi bi-dash"></i>
+            </button>
+
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary" 
+              disabled 
+              id="qty-heartPainting">
+              0
+            </button>
+
+            <button 
+              title="add"
+              type="button" 
+              class="btn btn-outline-success" 
+              onclick="changeQty('heartPainting', 1)">
               <i class="bi bi-plus"></i>
             </button>
             </div>
