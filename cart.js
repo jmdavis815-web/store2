@@ -2,6 +2,12 @@ window.addEventListener("DOMContentLoaded", () => {
   const CART_KEY = "magicMoonCart";
   const TAX_RATE = 0.08;      // 8% tax
   const SHIPPING_FLAT = 8.99; // flat shipping when there are items
+  const CHRISTMAS_DISCOUNT_RATE = 0.15;
+
+  function isChristmasSaleActive() {
+  const now = new Date();
+  return now.getMonth() === 11; // 0 = Jan, 11 = Dec
+}
 
   function getCart() {
     try {
@@ -54,26 +60,42 @@ window.addEventListener("DOMContentLoaded", () => {
     const shippingEl      = document.getElementById("cartShipping");
     const totalEl         = document.getElementById("cartTotal");
     const paypalContainer = document.getElementById("paypal-button-container");
+    const discountRow     = document.getElementById("discountRow");
+    const discountEl      = document.getElementById("cartDiscount");
+
 
     let paypalButtons = null;
 
     function calculateTotals() {
-      const cart = getCart();
-      let subtotal = 0;
+  const cart = getCart();
+  let subtotal = 0;
 
-      for (const [id, qty] of Object.entries(cart)) {
-        const product = PRODUCT_DATA[id];
-        if (!product) continue;
-        const price = Number(product.price || 0);
-        subtotal += price * (qty || 0);
-      }
+  for (const [id, qty] of Object.entries(cart)) {
+    const product = PRODUCT_DATA[id];
+    if (!product) continue;
+    const price = Number(product.price || 0);
+    subtotal += price * (qty || 0);
+  }
 
-      const tax = subtotal * TAX_RATE;
-      const shipping = subtotal > 0 ? SHIPPING_FLAT : 0;
-      const total = subtotal + tax + shipping;
+  // 🎄 Christmas sale logic
+  const discountActive = isChristmasSaleActive() && subtotal > 0;
+  const discount = discountActive ? subtotal * CHRISTMAS_DISCOUNT_RATE : 0;
+  const discountedSubtotal = subtotal - discount;
 
-      return { subtotal, tax, shipping, total };
-    }
+  const tax = discountedSubtotal * TAX_RATE;
+  const shipping = discountedSubtotal > 0 ? SHIPPING_FLAT : 0;
+  const total = discountedSubtotal + tax + shipping;
+
+  return {
+    subtotal,
+    discount,
+    tax,
+    shipping,
+    total,
+    discountedSubtotal,
+    discountActive
+  };
+}
 
     function renderPayPalButtons() {
       if (!paypalContainer || !window.paypal) return;
@@ -231,13 +253,27 @@ window.addEventListener("DOMContentLoaded", () => {
       });
 
       const totals = calculateTotals();
-      if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal.toFixed(2)}`;
-      if (taxEl) taxEl.textContent = `$${totals.tax.toFixed(2)}`;
-      if (shippingEl) {
-        shippingEl.textContent =
-          totals.subtotal > 0 ? `$${totals.shipping.toFixed(2)}` : "$0.00";
-      }
-      if (totalEl) totalEl.textContent = `$${totals.total.toFixed(2)}`;
+
+// Subtotal (before discount)
+if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal.toFixed(2)}`;
+
+// Show / hide discount row
+if (discountRow && discountEl) {
+  if (totals.discountActive && totals.discount > 0) {
+    discountRow.classList.remove("d-none");
+    discountRow.style.display = "flex";
+    discountEl.textContent = `-$${totals.discount.toFixed(2)}`;
+  } else {
+    discountRow.classList.add("d-none");
+  }
+}
+
+if (taxEl) taxEl.textContent = `$${totals.tax.toFixed(2)}`;
+if (shippingEl) {
+  shippingEl.textContent =
+    totals.discountedSubtotal > 0 ? `$${totals.shipping.toFixed(2)}` : "$0.00";
+}
+if (totalEl) totalEl.textContent = `$${totals.total.toFixed(2)}`;
 
       updateBadge();
       renderPayPalButtons();
